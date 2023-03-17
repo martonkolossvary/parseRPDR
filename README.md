@@ -9,7 +9,6 @@
 [![](https://cranlogs.r-pkg.org/badges/last-week/parseRPDR?color=E28413)](https://CRAN.R-project.org/package=parseRPDR)
 [![](https://cranlogs.r-pkg.org/badges/last-month/parseRPDR?color=CC76A1)](https://CRAN.R-project.org/package=parseRPDR)
 [![](https://cranlogs.r-pkg.org/badges/grand-total/parseRPDR?color=ABE188)](https://CRAN.R-project.org/package=parseRPDR)
-[![R-CMD-check](https://github.com/martonkolossvary/parseRPDR/workflows/R-CMD-check/badge.svg)](https://github.com/martonkolossvary/parseRPDR/actions)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/parseRPDR)](https://CRAN.R-project.org/package=parseRPDR)
 [![Lifecycle:

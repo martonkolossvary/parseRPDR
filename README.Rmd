@@ -19,7 +19,6 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 [![](https://cranlogs.r-pkg.org/badges/last-day/parseRPDR?color=4B8F8C)](https://CRAN.R-project.org/package=parseRPDR) [![](https://cranlogs.r-pkg.org/badges/last-week/parseRPDR?color=E28413)](https://CRAN.R-project.org/package=parseRPDR) [![](https://cranlogs.r-pkg.org/badges/last-month/parseRPDR?color=CC76A1)](https://CRAN.R-project.org/package=parseRPDR)
 [![](https://cranlogs.r-pkg.org/badges/grand-total/parseRPDR?color=ABE188)](https://CRAN.R-project.org/package=parseRPDR)
-[![R-CMD-check](https://github.com/martonkolossvary/parseRPDR/workflows/R-CMD-check/badge.svg)](https://github.com/martonkolossvary/parseRPDR/actions)
 [![CRAN status](https://www.r-pkg.org/badges/version/parseRPDR)](https://CRAN.R-project.org/package=parseRPDR)
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![Codecov test coverage](https://codecov.io/gh/martonkolossvary/parseRPDR/branch/master/graph/badge.svg)](https://app.codecov.io/gh/martonkolossvary/parseRPDR?branch=master)

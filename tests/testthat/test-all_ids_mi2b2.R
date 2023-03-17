@@ -8,7 +8,7 @@
 
 # Load and check equality ====================
 
-testthat::skip_on_cran()
+# testthat::skip_if_offline()
 suppressPackageStartupMessages(library(parseRPDR))
 folder_wd    <- "/Users/mjk2/Dropbox (Partners HealthCare)/parseRPDR_test/"
 folder_raw   <- paste0(folder_wd, "RAW/")
