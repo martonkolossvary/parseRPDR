@@ -1,0 +1,78 @@
+#' @title Loads medication order detail into R.
+#' @export
+#'
+#' @description Loads medication order detail information into the R environment, both Med and Mee files.
+#'
+#' @param file string, full file path to Med.txt or Mee.txt
+#' @param merge_id string, column name to use to create \emph{ID_MERGE} column used to merge different datasets. Defaults to \emph{EPIC_PMRN},
+#' as it is the preferred MRN in the RPDR system.
+#' @param sep string, divider between hospital ID and MRN. Defaults to \emph{:}.
+#' @param id_length string, indicating whether to modify MRN length based-on required values \emph{id_length = standard}, or to keep lengths as is \emph{id_length = asis}.
+#' If \emph{id_length = standard} then in case of \emph{MGH, BWH, MCL, EMPI and PMRN} the length of the MRNs are corrected accordingly by adding zeros, or removing numeral from the beginning.
+#' In other cases the lengths are unchanged. Defaults to \emph{standard}.
+#' @param perc numeric, a number between 0-1 indicating which parsed ID columns to keep. Data present in \emph{perc x 100\%} of patients are kept.
+#' @param na boolean, whether to remove columns with only NA values. Defaults to \emph{TRUE}.
+#' @param identical boolean, whether to remove columns with identical values. Defaults to \emph{TRUE}.
+#' @param nThread integer, number of threads to use to load data.
+#' @param mrn_type boolean, should data in \emph{MRN_Type} and \emph{MRN} be parsed. Defaults to \emph{FALSE}, as it is not advised to parse these for all data sources as it takes considerable time.
+#'
+#' @return data table, with medication order information.
+#' \describe{
+#'  \item{ID_MERGE}{numeric, defined IDs by \emph{merge_id}, used for merging later.}
+#'  \item{ID_med_EMPI}{string, Unique Partners-wide identifier assigned to the patient used to consolidate patient information
+#'  from \emph{enc} datasource, corresponds to EMPI in RPDR. Data is formatted using pretty_mrn().}
+#'  \item{ID_med_PMRN}{string, Epic medical record number. This value is unique across Epic instances within the Partners network
+#'  from \emph{enc} datasource, corresponds to EPIC_PMRN in RPDR. Data is formatted using pretty_mrn().}
+#'  \item{ID_med_loc}{string, if mrn_type == TRUE, then the data in \emph{MRN_Type} and \emph{MRN} are parsed into IDs corresponding to locations \emph{(loc)}. Data is formatted using pretty_mrn().}
+#'  \item{med_enc_numb}{string, Unique identifier of the record/visit, displayed in the following format: Source System - Institution Number, corresponds to Encounter_number in RPDR.}
+#'  \item{time_med}{POSIXct, Completion status of the requested test/transfusion. Converted to POSIXct format, corresponds to Medication_Date in RPDR.}
+#'  \item{time_med_detail}{string, To clarify when patients may have stopped taking a medication, this column provides the statuses of 'Listed' or 'Removed'. This is provided on pre-Epic (LMR) medication dates (1997-2017).
+#'  The 'Listed' value denotes that a medication was on the patient's medication list on the date indicated.
+#'  The 'Removed' value denotes that a medication was removed from a patient's medication list on the date indicated. Corresponds to Medication_Date_Detail in RPDR.}
+#'  \item{med}{string, Name of the medication. This may be appended with the source system in the case of OnCall and LMR medications, corresponds to Medication in RPDR.}
+#'  \item{med_code}{string, Medication code associated with the "Code_type" value, corresponds to Code in RPDR.}
+#'  \item{med_code_type}{string, Standardized classification system or custom source value used to identify the medication, corresponds to Code_Type in RPDR.}
+#'  \item{med_quant}{string, Number of units of the medication ordered, corresponds to Quantity in RPDR.}
+#'  \item{med_prov}{string, Ordering provider for the medication, corresponds to Provider in RPDR.}
+#'  \item{med_clinic}{string, Specific department/location where the medication was ordered or administered, corresponds to Clinic in RPDR.}
+#'  \item{med_hosp}{string, Facility where the medication was ordered or administered, corresponds to Hospital in RPDR.}
+#'  \item{med_inpatient}{string, Identifies whether the medication was ordered with an Inpatient or Outpatient indication, corresponds to Inpatient_Outpatient in RPDR.}
+#'  \item{med_add_info}{string, Additional administration information about the medication, corresponds to Additional_Info in RPDR.}
+#'  }
+#' @encoding UTF-8
+#'
+#' @examples \dontrun{
+#' #Using defaults
+#' d_med <- load_med(file = "test_Med.txt")
+#'
+#' #Use sequential processing
+#' d_med <- load_med(file = "test_Med.txt", nThread = 1)
+#'
+#' #Use parallel processing and parse data in MRN_Type and MRN columns and keep all IDs
+#' d_mee <- load_med(file = "test_Mee.txt", nThread = 20, mrn_type = TRUE, perc = 1)
+#' }
+
+load_med <- function(file, merge_id = "EMPI", sep = ":", id_length = "standard", perc = 0.6, na = TRUE, identical = TRUE, nThread = parallel::detectCores()-1, mrn_type = FALSE) {
+
+  DATA <- load_base(file = file, merge_id = merge_id, sep = sep, id_length = id_length, perc = perc, na = na, identical = identical, nThread = nThread, mrn_type = mrn_type, src = "med")
+  raw_id <- which(colnames(DATA) == "EMPI" | colnames(DATA) == "IncomingId")[1]
+  data_raw <- DATA[, raw_id:dim(DATA)[2]]
+  DATA     <- DATA[, 1:(raw_id-1)]
+
+  #Add additional information
+  DATA$time_med        <- as.POSIXct(data_raw$Medication_Date, format = "%m/%d/%Y")
+  DATA$time_med_detail <- pretty_text(data_raw$Medication_Date_Detail)
+  DATA$med             <- pretty_text(data_raw$Medication)
+  DATA$med_code        <- pretty_text(data_raw$Code)
+  DATA$med_code_type   <- pretty_text(data_raw$Code_Type)
+  DATA$med_quant       <- pretty_text(data_raw$Quantity)
+  DATA$med_prov        <- pretty_text(data_raw$Provider)
+  DATA$med_clinic      <- pretty_text(data_raw$Clinic)
+  DATA$med_hosp        <- pretty_text(data_raw$Hospital)
+  DATA$med_inpatient   <- pretty_text(data_raw$Inpatient_Outpatient)
+  DATA$med_add_info    <- pretty_text(data_raw$Additional_Info)
+  DATA$med_enc_numb    <- pretty_text(data_raw$Encounter_number)
+
+  if(dim(DATA)[1] != 1) {DATA <- remove_column(dt = DATA, na = na, identical = identical)}
+  return(DATA)
+}

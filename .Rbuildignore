@@ -1,0 +1,9 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^README\.Rmd$
+^README-.*\.png$
+^data-raw$
+^LICENSE\.md$
+^\.httr-oauth$
+^\.github$
+^codecov\.yml$
