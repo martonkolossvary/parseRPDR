@@ -124,6 +124,8 @@ Brief description of these can be found below:
     downloads using mi2b2 as described later in the text.
 -   **find_exam**: Find all, earliest or closest examination (i.e. lab)
     to a given timepoint.
+-   **export_notes**: Write out each individual report from loaded
+    notes.
 
 ## Parallelization and shared RAM management in parseRPDR
 
@@ -602,6 +604,19 @@ data_rad_parsed <- convert_notes(d = data_rad, code = "rad_rep_txt",
                                              "REPORT", "TECHNIQUE", "COMPARISON", "FINDINGS",
                                              "IMPRESSION", "RECOMMENDATION", "SIGNATURES",
                                              "report_end"), nThread = 2)
+```
+
+### *export_notes* - Saving individual notes as text files
+
+The *export_notes* function provides a standardized framework to write
+out each individual report from loaded notes. The text of each note is
+saved as a text file into a given folder. The folder should already be
+present, otherwise the function does not work.
+
+``` r
+#Load notes maintaining the original formatting of the document and save each note as a separate text file named using the patient identifier and the note number
+d <- load_notes("Car.txt", type = "car", nThread = 2, format_orig = TRUE)
+export_notes(d, folder = "/Users/Test/Notes/", code = "car_rep_txt", name1 = "ID_MERGE", name2 = "car_rep_num")
 ```
 
 ### *find_exam* - Finding exams within a timeframe of a timepoint

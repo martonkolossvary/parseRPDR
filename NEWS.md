@@ -1,5 +1,12 @@
 # Change log
 
+## parseRPDR 1.0.1 - 2023/03/31
+-   Added export_notes function which provides a 
+    convenience function to write out each report
+    as a separate text file.
+    
+-   Small bug fixes not affecting functionality.
+
 ## parseRPDR 1.0.0 - 2023/03/17
 -   Now support all data formats!
 
