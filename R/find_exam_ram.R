@@ -1,33 +1,7 @@
 #' @title Find exam data within a given timeframe using parallel CPU computing without shared RAM management.
 #' @keywords internal
 #'
-#' @description Finds all, earliest or closest examination to a given timepoints using parallel computing
-#'
-#' @param d_from data table, the database which is searched to find examinations within the timeframe.
-#' @param d_to data table, the database to which we wish to find examinations within the timeframe.
-#' @param d_from_ID string, column name of the patient ID column in d_from. Defaults to \emph{ID_MERGE}.
-#' @param d_to_ID string, column name of the patient ID column in d_to. Defaults to \emph{ID_MERGE}.
-#' @param d_from_time string, column name of the time variable column in d_from. Defaults to \emph{time_rad_exam}.
-#' @param d_to_time string, column name of the time variable column in d_to. Defaults to \emph{time_enc_admit}.
-#' @param time_diff_name string, column name of the new column created which holds the time difference between the exam and the time provided by d_to. Defaults to \emph{timediff_exam_to_db}.
-#' @param before boolean, should times before the given time be considered. Defaults to \emph{TRUE}.
-#' @param after boolean, should times after the given time be considered. Defaults to \emph{TRUE}.
-#' @param time integer, the timeframe considered between the exam and the d_to timepoints. Defaults to \emph{1}.
-#' @param time_unit string, the unit of time used. It is passed on to the \emph{units} argument of \emph{difftime}. "secs", "mins", "hours",
-#' "days" and "weeks" are supported.
-#' @param multiple string, which exams to give back. \emph{closest} gives back the exam closest to the time provided by d_to.
-#' \emph{all} gives back all occurrences within the timeframe. \emph{earliest} the earliest exam within the timeframe.
-#' In case of ties for \emph{closest} or \emph{earliest}, all are returned. Defaults to \emph{closest}.
-#' @param add_column string, a column name in d_to to add to the output. Defaults to \emph{NULL}.
-#' @param keep_data boolean, whether to include empty rows with only the \emph{d_from_ID} column filed out for cases that have data in the \emph{d_from}, but not within the time range. Defaults to \emph{FALSE}.
-#' @param nThread integer, number of threads to use by \emph{dopar} for parallelization. If it is set to 1, then no parallel backends are created and the function is executed sequentially.
-#'
-#' @return data table, with \emph{d_from} filtered to ones only within the timeframe. The columns of \emph{d_from} are returned with the corresponding time column in \emph{data_to}
-#' where the rows are instances which comply with the time constraints specified by the function. An additional column specified in \emph{time_diff_name} is also returned,
-#' which shows the time difference between the time column in \emph{d_from} and \emph{d_to} for that given case.
-#' Also the time column from \emph{d_to} specified by \emph{d_to_time} is returned under the name of \emph{time_to_db}.
-#' An additional column specified in \emph{add_column} may be added from \emph{data_to} to the data table.
-#'
+#' @description Finds all, earliest or closest examination to a given timepoints using parallel computing. A progress bar is also reported in the terminal to show the progress of the computation.
 #' @encoding UTF-8
 
 find_exam_ram <- function(d_from, d_to,
@@ -41,10 +15,14 @@ find_exam_ram <- function(d_from, d_to,
   #Initialize multicore
   if(nThread == 1) {
     `%exec%` <- foreach::`%do%`
+    future::plan(future::sequential)
   } else {
-    cl <- parallel::makeCluster(nThread, methods = FALSE, useXDR = FALSE)
-    doParallel::registerDoParallel(cl)
-    `%exec%` <- foreach::`%dopar%`
+    if(parallelly::supportsMulticore()) {
+      future::plan(future::multicore, workers = nThread)
+    } else {
+      future::plan(future::multisession, workers = nThread)
+    }
+    `%exec%` <- doFuture::`%dofuture%`
   }
 
   #Initiate output
@@ -64,15 +42,20 @@ find_exam_ram <- function(d_from, d_to,
   }
 
   message(paste0("Finding ", multiple, " data within ", time, " ", time_unit, "."))
+  divider <- ifelse(floor(dim(d_to)[1]/1000) == 0, 1, floor(dim(d_to)[1]/1000))
+  p <- progressr::progressor(steps = dim(d_to)[1]/divider)
 
   result <- foreach::foreach(j = 1:length(blocks), .combine="rbind",
-                             .inorder=TRUE,
+                             .inorder=TRUE, .options.future = list(chunk.size = 1.0,
+                                                                   packages = c("parseRPDR")),
                              .errorhandling = c("pass"), .verbose=FALSE) %exec%
     {
       get_ids <- blocks[[j]]
       Exams <- NULL
 
       for(i in get_ids) {
+        if(i %% divider == 0) {p(sprintf("i=%g", i))}
+
         Exam_i <- d_from[get(d_from_ID) == d_to[i, get(d_to_ID)]]
 
         if(dim(Exam_i)[1] != 0) {
@@ -125,7 +108,7 @@ find_exam_ram <- function(d_from, d_to,
       Exams
     }
 
-  if(exists("cl") & nThread>1) {parallel::stopCluster(cl)}
+  future::plan(future::sequential)
   return(result)
 }
 

@@ -1,7 +1,7 @@
-#' @title Find exam data within a given timeframe using parallel CPU computing and possibly shared RAM management.
+#' @title Find exam data within a given timeframe using parallel CPU computing.
 #' @export
 #'
-#' @description Finds all, earliest or closest examination to a given timepoints using parallel computing
+#' @description Finds all, earliest or closest examination to a given timepoints using parallel computing. A progress bar is also reported in the terminal to show the progress of the computation.
 #'
 #' @param d_from data table, the database which is searched to find examinations within the timeframe.
 #' @param d_to data table, the database to which we wish to find examinations within the timeframe.
@@ -23,11 +23,8 @@
 #' @param add_column string, a column name in d_to to add to the output. Defaults to \emph{NULL}.
 #' @param keep_data boolean, whether to include empty rows with only the \emph{d_from_ID} column filed out for cases that have data in the \emph{d_from}, but not within the time range. Defaults to \emph{FALSE}.
 #' @param nThread integer, number of threads to use for parallelization. If it is set to 1, then no parallel backends are created and the function is executed sequentially.
-#' @param shared_RAM boolean, whether to use shared memory during parallelization using the \emph{bigmemory} package. This allows to process \emph{d_from} and/or \emph{d_to} datasets with >1M rows.
-#' Be aware that shared RAM usually results in slower run times, therefore by default it is set to \emph{FALSE},
-#' but it allows to run more threads when the datasets are large providing overall faster run times.
-#' Be aware that the optimal number of clusters might be different setting it to TRUE or FALSE, and this has to be determined empirically per machine.
-#' The feature is very unstable and therefore should only be tried if there is no other option
+#' @param shared_RAM boolean, depreciated from version 1.1.0 onwards, only kept for compatibility, as Bigmemory package has issues on running on different operating systems.
+#' Now all computations are run using the memory usage specifications of the paralellization strategy.
 #'
 #' @return data table, with \emph{d_from} filtered to ones only within the timeframe. The columns of \emph{d_from} are returned with the corresponding time column in \emph{data_to}
 #' where the rows are instances which comply with the time constraints specified by the function. An additional column specified in \emph{time_diff_name} is also returned,
@@ -47,14 +44,14 @@
 #' d_from_ID = "ID_MERGE", d_to_ID = "ID_MERGE",
 #' d_from_time = "time_rdt_exam", d_to_time = "time_enc_admit", time_diff_name = "time_diff_ED_rdt",
 #' before = TRUE, after = TRUE, time = 3, time_unit = "days", multiple = "all",
-#' nThread = 2, shared_RAM = FALSE)
+#' nThread = 2)
 #'
 #' #Find earliest radiological examinations within 3 day of the ED registration
 #' rdt_ED <- find_exam(d_from = data_rdt, d_to = data_enc_ED,
 #' d_from_ID = "ID_MERGE", d_to_ID = "ID_MERGE",
 #' d_from_time = "time_rdt_exam", d_to_time = "time_enc_admit", time_diff_name = "time_diff_ED_rdt",
 #' before = TRUE, after = TRUE, time = 3, time_unit = "days", multiple = "earliest",
-#' nThread = 2, shared_RAM = FALSE)
+#' nThread = 2)
 #'
 #' #Find closest radiological examinations on or after 1 day of the ED registration
 #' #and add primary diagnosis column from encounters
@@ -62,7 +59,7 @@
 #' d_from_ID = "ID_MERGE", d_to_ID = "ID_MERGE",
 #' d_from_time = "time_rdt_exam", d_to_time = "time_enc_admit", time_diff_name = "time_diff_ED_rdt",
 #' before = FALSE, after = TRUE, time = 1, time_unit = "days", multiple = "earliest",
-#' add_column = "enc_diag_princ", nThread = 2, shared_RAM = FALSE)
+#' add_column = "enc_diag_princ", nThread = 2)
 #'
 #' #Find closest radiological examinations on or after 1 day of the ED registration
 #' #but also provide empty rows for patients with exam data but not within the timeframe
@@ -70,7 +67,7 @@
 #' d_from_ID = "ID_MERGE", d_to_ID = "ID_MERGE",
 #' d_from_time = "time_rdt_exam", d_to_time = "time_enc_admit", time_diff_name = "time_diff_ED_rdt",
 #' before = FALSE, after = TRUE, time = 1, time_unit = "days", multiple = "earliest",
-#' add_column = "enc_diag_princ", keep_data = TRUE nThread = 2, shared_RAM = FALSE)
+#' add_column = "enc_diag_princ", keep_data = TRUE nThread = 2)
 #' }
 
 
@@ -80,18 +77,14 @@ find_exam <- function(d_from, d_to,
                       time_diff_name = "timediff_exam_to_db", before = TRUE, after = TRUE, time = 1, time_unit = "days",
                       multiple = "closest", add_column = NULL, keep_data = FALSE, nThread = parallel::detectCores()-1, shared_RAM = FALSE) {
 
-  if(nThread > 1 & shared_RAM) {
-    out <- find_exam_bm(d_from = d_from, d_to = d_to,
-                        d_from_ID = d_from_ID, d_to_ID = d_to_ID,
-                        d_from_time = d_from_time, d_to_time = d_to_time,
-                        time_diff_name = time_diff_name, before = before, after = after, time = time, time_unit = time_unit,
-                        multiple = multiple, add_column = add_column, keep_data = keep_data, nThread = nThread)
-  } else {
-    out <- find_exam_ram(d_from = d_from, d_to = d_to,
-                         d_from_ID = d_from_ID, d_to_ID = d_to_ID,
-                         d_from_time = d_from_time, d_to_time = d_to_time,
-                         time_diff_name = time_diff_name, before = before, after = after, time = time, time_unit = time_unit,
-                         multiple = multiple, add_column = add_column, keep_data = keep_data, nThread = nThread)
-  }
+  shared_RAM = FALSE
+
+
+  progressr::with_progress({out <- find_exam_ram(d_from = d_from, d_to = d_to,
+                       d_from_ID = d_from_ID, d_to_ID = d_to_ID,
+                       d_from_time = d_from_time, d_to_time = d_to_time,
+                       time_diff_name = time_diff_name, before = before, after = after, time = time, time_unit = time_unit,
+                       multiple = multiple, add_column = add_column, keep_data = keep_data, nThread = nThread)})
+
   return(out)
 }

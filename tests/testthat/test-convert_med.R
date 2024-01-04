@@ -6,7 +6,7 @@
 ## Date: 2023-02-24
 ###############################################################################
 
-# testthat::skip_if_offline()
+testthat::skip_if_offline()
 # Load and check equality ====================
 
 suppressPackageStartupMessages(library(parseRPDR))
@@ -22,7 +22,7 @@ d_p <- suppressMessages(load_med(d_fname, nThread = 2))
 meds <- list(statin = c("Simvastatin", "Atorvastatin"), NSAID  = c("Acetaminophen", "Paracetamol"))
 
 expect_true({
-  c_s <- suppressMessages(convert_med(d_p, codes_to_find = meds, nThread = 4))
+  c_s <- suppressMessages(convert_med(d_p, codes_to_find = meds, nThread = 2))
   if(!is.null(c_s)) TRUE
 })
 
@@ -43,13 +43,21 @@ test_that("convert_med run using sequential and parallel loading returns same re
 })
 
 expect_true({
-  c_p_sum <- suppressMessages(convert_med(d_p, codes_to_find = meds, collapse = "ID_MERGE", aggr_type = "latest", nThread = 2))
-  c_p_sum <- suppressMessages(convert_med(d_p, codes_to_find = NULL, collapse = "ID_MERGE", aggr_type = "latest", nThread = 2))
+  c_p_sum <- suppressMessages(convert_med(d_p, codes_to_find = meds, collapse = "ID_MERGE", aggr_type = "earliest", nThread = 4))
+  c_p_sum <- suppressMessages(convert_med(d_p, codes_to_find = NULL, collapse = "ID_MERGE", aggr_type = "earliest", nThread = 2))
   TRUE
 })
 
+c_s_sum <- suppressMessages(convert_med(d_p, codes_to_find = meds, collapse = "ID_MERGE", aggr_type = "latest", nThread = 1))
+c_p_sum <- suppressMessages(convert_med(d_p, codes_to_find = meds, collapse = "ID_MERGE", aggr_type = "latest", nThread = 4))
+
+
+test_that("convert_med summarizing using sequential and parallel loading returns same results", {
+  expect_equal(c_s_sum, c_p_sum)
+})
+
 c_s_sum <- suppressMessages(convert_med(d_p, codes_to_find = meds, collapse = "ID_MERGE", aggr_type = "earliest", nThread = 1))
-c_p_sum <- suppressMessages(convert_med(d_p, codes_to_find = meds, collapse = "ID_MERGE", aggr_type = "earliest", nThread = 2))
+c_p_sum <- suppressMessages(convert_med(d_p, codes_to_find = meds, collapse = "ID_MERGE", aggr_type = "earliest", nThread = 4))
 
 
 test_that("convert_med summarizing using sequential and parallel loading returns same results", {

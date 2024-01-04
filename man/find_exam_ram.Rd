@@ -23,48 +23,7 @@ find_exam_ram(
   nThread = parallel::detectCores() - 1
 )
 }
-\arguments{
-\item{d_from}{data table, the database which is searched to find examinations within the timeframe.}
-
-\item{d_to}{data table, the database to which we wish to find examinations within the timeframe.}
-
-\item{d_from_ID}{string, column name of the patient ID column in d_from. Defaults to \emph{ID_MERGE}.}
-
-\item{d_to_ID}{string, column name of the patient ID column in d_to. Defaults to \emph{ID_MERGE}.}
-
-\item{d_from_time}{string, column name of the time variable column in d_from. Defaults to \emph{time_rad_exam}.}
-
-\item{d_to_time}{string, column name of the time variable column in d_to. Defaults to \emph{time_enc_admit}.}
-
-\item{time_diff_name}{string, column name of the new column created which holds the time difference between the exam and the time provided by d_to. Defaults to \emph{timediff_exam_to_db}.}
-
-\item{before}{boolean, should times before the given time be considered. Defaults to \emph{TRUE}.}
-
-\item{after}{boolean, should times after the given time be considered. Defaults to \emph{TRUE}.}
-
-\item{time}{integer, the timeframe considered between the exam and the d_to timepoints. Defaults to \emph{1}.}
-
-\item{time_unit}{string, the unit of time used. It is passed on to the \emph{units} argument of \emph{difftime}. "secs", "mins", "hours",
-"days" and "weeks" are supported.}
-
-\item{multiple}{string, which exams to give back. \emph{closest} gives back the exam closest to the time provided by d_to.
-\emph{all} gives back all occurrences within the timeframe. \emph{earliest} the earliest exam within the timeframe.
-In case of ties for \emph{closest} or \emph{earliest}, all are returned. Defaults to \emph{closest}.}
-
-\item{add_column}{string, a column name in d_to to add to the output. Defaults to \emph{NULL}.}
-
-\item{keep_data}{boolean, whether to include empty rows with only the \emph{d_from_ID} column filed out for cases that have data in the \emph{d_from}, but not within the time range. Defaults to \emph{FALSE}.}
-
-\item{nThread}{integer, number of threads to use by \emph{dopar} for parallelization. If it is set to 1, then no parallel backends are created and the function is executed sequentially.}
-}
-\value{
-data table, with \emph{d_from} filtered to ones only within the timeframe. The columns of \emph{d_from} are returned with the corresponding time column in \emph{data_to}
-where the rows are instances which comply with the time constraints specified by the function. An additional column specified in \emph{time_diff_name} is also returned,
-which shows the time difference between the time column in \emph{d_from} and \emph{d_to} for that given case.
-Also the time column from \emph{d_to} specified by \emph{d_to_time} is returned under the name of \emph{time_to_db}.
-An additional column specified in \emph{add_column} may be added from \emph{data_to} to the data table.
-}
 \description{
-Finds all, earliest or closest examination to a given timepoints using parallel computing
+Finds all, earliest or closest examination to a given timepoints using parallel computing. A progress bar is also reported in the terminal to show the progress of the computation.
 }
 \keyword{internal}

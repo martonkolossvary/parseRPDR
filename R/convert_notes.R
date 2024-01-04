@@ -51,10 +51,14 @@ convert_notes <- function(d, code = NULL, anchors = NULL, nThread = parallel::de
   #Initialize multicore
   if(nThread == 1) {
     `%exec%` <- foreach::`%do%`
+    future::plan(future::sequential)
   } else {
-    cl <- parallel::makeCluster(nThread, methods = FALSE, useXDR = FALSE)
-    doParallel::registerDoParallel(cl)
-    `%exec%` <- foreach::`%dopar%`
+    if(parallelly::supportsMulticore()) {
+      future::plan(future::multicore, workers = nThread)
+    } else {
+      future::plan(future::multisession, workers = nThread)
+    }
+    `%exec%` <- doFuture::`%dofuture%`
   }
 
   #Find text locations
@@ -67,7 +71,7 @@ convert_notes <- function(d, code = NULL, anchors = NULL, nThread = parallel::de
 
   #Run parallel on elements of anchors
   result <- foreach::foreach(i = 1:length(anchors), .combine="cbind",
-                             .inorder=TRUE,
+                             .inorder=TRUE, .options.future = list(chunk.size = 1.0),
                              .errorhandling = c("pass"), .verbose=FALSE) %exec%
     {
       from    <- d_loc[[i]] + d_length[[i]] #nchar ID from to use text
@@ -96,6 +100,6 @@ convert_notes <- function(d, code = NULL, anchors = NULL, nThread = parallel::de
   colnames(result) <- cols
 
   result <- cbind(d, result)
-  if(exists("cl") & nThread>1) {parallel::stopCluster(cl)}
+  future::plan(future::sequential)
   return(result)
 }

@@ -87,7 +87,7 @@ dcm_db <- function(path, ext, all, keywords, nThread, pydicom) {
   else { #Go in sub-directory and repeat function recursively
     sublist   <- parallel::mclapply(paste0(path, "/", folders), function(x){
       dcm_db(path = x, ext = ext, all = all, keywords = keywords, nThread = nThread, pydicom = pydicom)
-    }, mc.cores = nThread)
+    }, mc.cores = nThread, mc.allow.recursive = TRUE)
     data.table::rbindlist(sublist, fill = TRUE) #create dt
   }
 }

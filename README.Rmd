@@ -76,11 +76,9 @@ Besides these functions, there are ones that are not connected to specific datas
 -   **find_exam**: Find all, earliest or closest examination (i.e. lab) to a given timepoint.
 -   **export_notes**: Write out each individual report from loaded notes.
 
-## Parallelization and shared RAM management in parseRPDR
+## Parallelization in parseRPDR
 
-All functionalities of **parseRPDR** are parallelized to assist the analysis of large datasets. The user does not need to know anything of what is being done in the background, simply setting the *nThread* parameter in the function calls sets everything up. Please be aware that the optimal number of threads depends on the system running the application. By default nThread is set to parallel::detectCores()-1, which means that all except one of the threads on the given machine will be used. Be aware that parallelization also requires additional memory to run the functions. Setting *nThread=1* results in sequential analysis, which might be beneficial for small datasets.
-
-In case of the *find_exam* function, there is an opportunity to use shared RAM management. In case of large datasets (\>1M rows), this may provide more efficient RAM management. However, this also results in slower run times, but on the other hand may allow to run the search process on more threads. The balance needs to be determined empirically for each machine, but as a rule of thumb, if the datasets supplied to *find_exam* do not exceed 1M rows then shared RAM management is not beneficial.
+All functionalities of **parseRPDR** are parallelized to assist the analysis of large datasets. The user does not need to know anything of what is being done in the background, simply setting the *nThread* parameter in the function calls sets everything up. Please be aware that the optimal number of threads depends on the system running the application. By default nThread is set to parallel::detectCores()-1, which means that all except one of the threads on the given machine will be used. Be aware that parallelization also requires additional memory to run the functions. Setting *nThread=1* results in sequential analysis, which might be beneficial for small datasets. All parallelizations are done using dynamic load balancing.
 
 *NOTE!!!*
 
@@ -334,7 +332,7 @@ export_notes(d, folder = "/Users/Test/Notes/", code = "car_rep_txt", name1 = "ID
 
 ### *find_exam* - Finding exams within a timeframe of a timepoint
 
-One of the most common tasks in creating a database from clinical data, is to find given examinations (lab results, radiological examinations, diagnoses etc.) within a given timeframe of an event or encounter. For this, **parseRPDR** provides the *find_exam* function, which tries to find the earliest, closest or all the examinations within a given timeframe of an event or encounter. The function runs the search in parallel on multiple threads which can be specified using nThread. If it is set to 1, then no parallel backends are created and the function is executed sequentially. The function allows flexibility using its input arguments:
+One of the most common tasks in creating a database from clinical data, is to find given examinations (lab results, radiological examinations, diagnoses etc.) within a given timeframe of an event or encounter. For this, **parseRPDR** provides the *find_exam* function, which tries to find the earliest, closest or all the examinations within a given timeframe of an event or encounter. The function runs the search in parallel on multiple threads which can be specified using nThread. If it is set to 1, then no parallel backends are created and the function is executed sequentially. A progress bar is also reported in the terminal. The function allows flexibility using its input arguments:
 
 -   *d_from*: Data.table which contains the examination data, from which we are looking for examinations complying to the criteria specified by the arguments.
 -   *d_to*: Data.table which contains the encounter or event information to which we are trying to find examinations complying to the criteria specified by the arguments.
@@ -350,7 +348,7 @@ One of the most common tasks in creating a database from clinical data, is to fi
 -   *add_column*: Optional, the name of the column in d_to which can be added to the output.
 -   *keep_data*: Whether to include empty rows with only the ID column filed out for cases that have data in the d_from, but not within the time range.
 -   *nThread*: The number of threads to use for parallel computing.
--   *shared_RAM*: Whether shared RAM management should be used during parallelization. Default is FALSE. In case of large datasets (\>1M rows) and running on server machines, it might be beneficial to have shared memory access between the threads. This slows things down, but also means that not all datasets need to be copied for each worker, therefore more threads can be utilized.
+-   *shared_RAM*: Depreciated from version 1.1.0 onwards, only kept for compatibility, as Bigmemory package has issues on running on different operating systems. Now all computations are run using the memory usage specifications of the paralellization strategy.
 
 Here we present example cases of using the function to locate radiological examinations within a timeframe of given encounters.
 
@@ -365,7 +363,7 @@ rdt_ED <- find_exam(d_from = data_rdt, d_to = data_enc_ED,
                     d_from_time = "time_rdt_exam", d_to_time = "time_enc_admit",
                     time_diff_name = "time_diff_ED_rdt", before = TRUE, after = TRUE,
                     time = 3, time_unit = "days", multiple = "all",
-                    nThread = 2, shared_RAM = FALSE)
+                    nThread = 2)
 
 #Find earliest radiological examinations within 3 day of the ED registration
 rdt_ED <- find_exam(d_from = data_rdt, d_to = data_enc_ED,
@@ -373,7 +371,7 @@ rdt_ED <- find_exam(d_from = data_rdt, d_to = data_enc_ED,
                     d_from_time = "time_rdt_exam", d_to_time = "time_enc_admit",
                     time_diff_name = "time_diff_ED_rdt", before = TRUE, after = TRUE,
                     time = 3, time_unit = "days", multiple = "earliest",
-                    nThread = 2, shared_RAM = FALSE)
+                    nThread = 2)
 
 #Find closest radiological examinations on or after 1 day of the ED registration
 #and add primary diagnosis column from encounters
@@ -382,7 +380,7 @@ rdt_ED <- find_exam(d_from = data_rdt, d_to = data_enc_ED,
                     d_from_time = "time_rdt_exam", d_to_time = "time_enc_admit",
                     time_diff_name = "time_diff_ED_rdt", before = FALSE, after = TRUE,
                     time = 1, time_unit = "days", multiple = "earliest",
-                    add_column = "enc_diag_princ", nThread = 2, shared_RAM = FALSE)
+                    add_column = "enc_diag_princ", nThread = 2)
 
 #Find closest radiological examinations on or after 1 day of the ED registration but
 #also provide empty rows for patients with exam data but not within the timeframe
@@ -392,7 +390,7 @@ rdt_ED <- find_exam(d_from = data_rdt, d_to = data_enc_ED,
                     time_diff_name = "time_diff_ED_rdt", before = FALSE, after = TRUE,
                     time = 1, time_unit = "days", multiple = "earliest",
                     add_column = "enc_diag_princ", keep_data = TRUE,
-                    nThread = 2, shared_RAM = FALSE)
+                    nThread = 2)
 ```
 
 The function only supports intervals following up to or beginning at the given encounter. If for example the user wishes to search whether a patient had any radiological examination 1 year prior to the encounter, then the search criteria should be set to a large interval prior to the encounter and then using one line of code the user can filer out all exams which are less than 365 days from the encounter using the resulting *time_diff_name* column in the returned data.table.

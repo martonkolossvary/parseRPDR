@@ -39,7 +39,7 @@
 
 load_all_data <- function(folder, which_data = c("mrn", "con", "dem", "all", "bib", "dia", "enc", "lab", "lno", "mcm", "med", "mic", "phy", "prc", "prv", "ptd", "rdt", "rfv", "trn",
                                                  "car", "dis", "end", "hnp", "opn", "pat", "prg", "pul", "rad", "vis"), old_dem = FALSE,
-                     merge_id = "EMPI", sep = ":", id_length = "standard", perc = 0.6, na = TRUE, identical = TRUE, nThread = parallel::detectCores()-1, many_sources = TRUE, load_report = TRUE, format_orig = FALSE) {
+                          merge_id = "EMPI", sep = ":", id_length = "standard", perc = 0.6, na = TRUE, identical = TRUE, nThread = parallel::detectCores()-1, many_sources = TRUE, load_report = TRUE, format_orig = FALSE) {
 
   .SD=.N=.I=.GRP=.BY=.EACHI=..=..cols=.SDcols=i=j=time_to_db=..which_ids_to=..which_ids_from <- NULL
 
@@ -57,13 +57,18 @@ load_all_data <- function(folder, which_data = c("mrn", "con", "dem", "all", "bi
     #Initialize clusters
     if(nThread == 1) {
       `%exec_inner%` <- foreach::`%do%`; `%exec_outer%` <- foreach::`%do%`
+      future::plan(future::sequential)
     } else {
-      cl <- parallel::makeCluster(nThread, methods = FALSE, useXDR = FALSE)
-      `%exec_inner%` <- foreach::`%do%`; `%exec_outer%` <- foreach::`%dopar%`
-      doParallel::registerDoParallel(cl)
+      if(parallelly::supportsMulticore()) {
+        future::plan(future::multicore, workers = nThread)
+      } else {
+        future::plan(future::multisession, workers = nThread)
+      }
+      `%exec_inner%` <- foreach::`%do%`; `%exec_outer%` <- doFuture::`%dofuture%`
     }
 
-    result <- foreach::foreach(i = 1:length(l_df), .inorder=TRUE,
+    result <- foreach::foreach(i = 1:length(l_df), .inorder=TRUE, .options.future = list(globals = TRUE, chunk.size = 1.0,
+                                                                                         packages = c("parseRPDR", "foreach", "doFuture")),
                                .errorhandling = c("pass"), .verbose=FALSE) %exec_outer%
       {
         type <- names(l_df)[i]
@@ -104,7 +109,8 @@ load_all_data <- function(folder, which_data = c("mrn", "con", "dem", "all", "bi
         files_long_type <-files_long[files_type[order(numb)]] #select and order full file paths
 
 
-        result <- foreach::foreach(j = 1:length(files_long_type), .inorder=TRUE,
+        result <- foreach::foreach(j = 1:length(files_long_type), .inorder=TRUE, .options.future = list(globals = TRUE, chunk.size = 1.0,
+                                                                                                        packages = c("parseRPDR", "foreach", "doFuture")),
                                    .errorhandling = c("pass"), .verbose=FALSE) %exec_inner%
           {
             if(length(files_long_type) != 0) {
@@ -138,17 +144,14 @@ load_all_data <- function(folder, which_data = c("mrn", "con", "dem", "all", "bi
         result <- remove_column(dt = result, na = na, identical = identical) #remove columns if necessary
         result
       }
-    if(exists("cl") & nThread>1) {parallel::stopCluster(cl)}
+    future::plan(future::sequential)
 
   } else { #Parallelize inner loop
 
-    if(nThread == 1) {
-      `%exec_inner%` <- foreach::`%do%`; `%exec_outer%` <- foreach::`%do%`
-    } else {
-      `%exec_inner%` <- foreach::`%dopar%`; `%exec_outer%` <- foreach::`%do%`
-    }
+    `%exec_outer%` <- foreach::`%do%`
 
-    result <- foreach::foreach(i = 1:length(l_df), .inorder=TRUE,
+    result <- foreach::foreach(i = 1:length(l_df), .inorder=TRUE, .options.future = list(globals = TRUE, chunk.size = 1.0,
+                                                                                         packages = c("parseRPDR", "foreach", "doFuture")),
                                .errorhandling = c("pass"), .verbose=FALSE) %exec_outer%
       {
         type <- names(l_df)[i]
@@ -190,15 +193,20 @@ load_all_data <- function(folder, which_data = c("mrn", "con", "dem", "all", "bi
         #Initiate clusters
         if(length(files_long_type) < nThread) {nThread <- length(files_long_type)}
         if(nThread == 1) {
-          `%exec_inner%` <- foreach::`%do%`; `%exec_outer%` <- foreach::`%do%`
+          `%exec_inner%` <- foreach::`%do%`
+          future::plan(future::sequential)
         } else {
-          cl <- parallel::makeCluster(nThread, methods = FALSE, useXDR = FALSE)
-          `%exec_inner%` <- foreach::`%dopar%`; `%exec_outer%` <- foreach::`%do%`
-          doParallel::registerDoParallel(cl)
+          if(parallelly::supportsMulticore()) {
+            future::plan(future::multicore, workers = nThread)
+          } else {
+            future::plan(future::multisession, workers = nThread)
+          }
+          `%exec_inner%` <- doFuture::`%dofuture%`
         }
 
-        result_inner <- foreach::foreach(j = 1:length(files_long_type), .inorder=TRUE,
-                                         .errorhandling = c("pass"), .verbose=FALSE) %exec_inner%
+        result_inner <- foreach::foreach(j = 1:length(files_long_type), .inorder=TRUE, .options.future = list(globals = TRUE, chunk.size = 1.0,
+                                                                                                              packages = c("parseRPDR", "foreach", "doFuture")),
+                                         errorhandling = c("pass"), .verbose=FALSE) %exec_inner%
           {
             if(length(files_long_type) != 0) {
               if(type %in% c("car", "dis", "end", "hnp", "opn", "pat", "prg", "pul", "rad", "vis")) {
@@ -227,7 +235,7 @@ load_all_data <- function(folder, which_data = c("mrn", "con", "dem", "all", "bi
               l_i
             }
           }
-        if(exists("cl") & nThread>1) {parallel::stopCluster(cl)}
+        future::plan(future::sequential)
         result_inner <- data.table::rbindlist(result_inner, use.names = TRUE, fill = TRUE) #merge data sources
         result_inner <- remove_column(dt = result_inner, na = na, identical = identical) #remove columns if necessary
         result_inner

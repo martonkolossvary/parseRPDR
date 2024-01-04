@@ -25,10 +25,14 @@ parse_ids <- function(str, num = NULL, sep = ":", id_length = "standard", perc =
   #Initialize multicore
   if(nThread == 1) {
     `%exec%` <- foreach::`%do%`
+    future::plan(future::sequential)
   } else {
-    cl <- parallel::makeCluster(nThread, methods = FALSE, useXDR = FALSE)
-    doParallel::registerDoParallel(cl)
-    `%exec%` <- foreach::`%dopar%`
+    if(parallelly::supportsMulticore()) {
+      future::plan(future::multicore, workers = nThread)
+    } else {
+      future::plan(future::multisession, workers = nThread)
+    }
+    `%exec%` <- doFuture::`%dofuture%`
   }
 
   #Parse Patient_ID_List to get IDs above ID_perc_available prevalence
@@ -51,7 +55,7 @@ parse_ids <- function(str, num = NULL, sep = ":", id_length = "standard", perc =
   message("Parsing all possible IDs.")
 
   result <- foreach::foreach(i = 1:length(HospIDs_str_inc_boo), .combine="rbind",
-                             .inorder=TRUE,
+                             .inorder=TRUE, .options.future = list(chunk.size = 1.0),
                              .errorhandling = c("pass"), .verbose=FALSE) %exec%
     {
       df_ids <- data.table::data.table(matrix(as.character(NA), nrow = 1, ncol = length(HospIDs_str_incl)))
@@ -64,6 +68,6 @@ parse_ids <- function(str, num = NULL, sep = ":", id_length = "standard", perc =
       df_ids
     }
 
-  if(exists("cl") & nThread>1) {parallel::stopCluster(cl)}
+  future::plan(future::sequential)
   return(result)
 }

@@ -40,35 +40,48 @@ pretty_mrn <- function(v, prefix = "MGH", sep = ":", id_length = "standard", nTh
   #Initialize multicore
   if(nThread == 1) {
     `%exec%` <- foreach::`%do%`
+    future::plan(future::sequential)
   } else {
-    cl <- parallel::makeCluster(nThread, methods = FALSE, useXDR = FALSE, )
-    doParallel::registerDoParallel(cl)
-    `%exec%` <- foreach::`%dopar%`
+    if(parallelly::supportsMulticore()) {
+      future::plan(future::multicore, workers = nThread)
+    } else {
+      future::plan(future::multisession, workers = nThread)
+    }
+    `%exec%` <- doFuture::`%dofuture%`
   }
 
   #Initiate chunks
   v_split <- split(v, sort(rep_len(1:nThread, length(v))))
+  if(length(prefix) == 1) {
+    prefix_split <- prefix
+  } else {
+    prefix_split <- split(prefix, sort(rep_len(1:nThread, length(v))))
+  }
+
 
   result <- foreach::foreach(i = 1:nThread, .combine="c",
-                             .inorder=TRUE,
+                             .inorder=TRUE, .options.future = list(chunk.size = 1.0),
+                             .options.future = list(globals = structure(TRUE, add = "prefix_split"), globals.maxSize = 100 * 1024 ^ 3),
                              .errorhandling = c("pass"), .verbose=FALSE) %exec%
     {
       v_i <- v_split[[i]]
 
       #Create vectors of same length
-      if(length(prefix) == 1) {
-        prefix <- rep(prefix, length(v_i))
+      if(length(prefix_split) == 1) {
+        prefix_i <- rep(prefix, length(v_i))
+      } else{
+        prefix_i <- prefix_split[[i]]
       }
 
       #Create length vector
       length <- len <- nchar(as.character(v_i))
 
       if(id_length == "standard") {
-        length[prefix == "MGH"] <- 7
-        length[prefix == "BWH"] <- 8
-        length[prefix == "MCL"] <- 6
-        length[prefix == "EMPI"] <- 9
-        length[prefix == "PMRN"] <- 11
+        length[prefix_i == "MGH"] <- 7
+        length[prefix_i == "BWH"] <- 8
+        length[prefix_i == "MCL"] <- 6
+        length[prefix_i == "EMPI"] <- 9
+        length[prefix_i == "PMRN"] <- 11
       }
 
       dif <- length - len
@@ -77,15 +90,15 @@ pretty_mrn <- function(v, prefix = "MGH", sep = ":", id_length = "standard", nTh
       for(j in  1:length(v_i)) {
         if(!is.na(v_i[j])) {
           if(dif[j]<0) {
-            v_out[j] <- paste0(prefix[j], sep, sub(paste0(rep(".", abs(dif[j])), collapse = ""), "", v_i[j])) #If string is longer than anticipated
+            v_out[j] <- paste0(prefix_i[j], sep, sub(paste0(rep(".", abs(dif[j])), collapse = ""), "", v_i[j])) #If string is longer than anticipated
           } else{
-            v_out[j] <- paste0(prefix[j], sep, strrep("0", dif[j]), v_i[j]) #If string is shorter or equal than anticipated
+            v_out[j] <- paste0(prefix_i[j], sep, strrep("0", dif[j]), v_i[j]) #If string is shorter or equal than anticipated
           }
         }
       }
       v_out
     }
 
-  if(exists("cl") & nThread>1) {parallel::stopCluster(cl)}
+  future::plan(future::sequential)
   return(result)
 }

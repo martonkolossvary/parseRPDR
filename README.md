@@ -48,28 +48,28 @@ objects to provide fast and efficient manipulations on even large
 datasets. Besides importing the data, the load functions also modify the
 variables names in a standardized fashion to help later analyses:
 
--   All variables are snake case: names are lowercase (except for
-    abbreviations), words within the names are separated by: “\_”.
--   All ID variables start with “ID” and then are followed by the source
-    (con, dem etc.) from which they are created from.
--   All time variable names start with “time”.
--   Procedural data start with the data source name (lab, rdt etc.).
--   Names are created in a hierarchical manner, for example information
-    corresponding to the results of the specific lab test all start
-    with: “lab_result\_”.
--   All location and personnel attributes are names in the same
-    convention in the different data tables (e.g.: Hospital and Clinical
-    variable types).
--   Variables are ordered in a logical fashion with the IDs always being
-    the first columns and the encounter/accession identifiers the last
-    column.
+- All variables are snake case: names are lowercase (except for
+  abbreviations), words within the names are separated by: “\_”.
+- All ID variables start with “ID” and then are followed by the source
+  (con, dem etc.) from which they are created from.
+- All time variable names start with “time”.
+- Procedural data start with the data source name (lab, rdt etc.).
+- Names are created in a hierarchical manner, for example information
+  corresponding to the results of the specific lab test all start with:
+  “lab_result\_”.
+- All location and personnel attributes are names in the same convention
+  in the different data tables (e.g.: Hospital and Clinical variable
+  types).
+- Variables are ordered in a logical fashion with the IDs always being
+  the first columns and the encounter/accession identifiers the last
+  column.
 
 The functions also do minimal data cleaning to help later analyses:
 
--   “ID_MERGE” column is added to all datasources to help later merging.
--   “ID” data columns are formatted according to RPDR ID requirements.
--   Time variables are converted to POSIXct data formats.
--   Unknown values are converted to NA.
+- “ID_MERGE” column is added to all datasources to help later merging.
+- “ID” data columns are formatted according to RPDR ID requirements.
+- Time variables are converted to POSIXct data formats.
+- Unknown values are converted to NA.
 
 Besides providing an interface to import text outputs from RPDR into the
 R environment, **parseRPDR** also provides functions to do common tasks.
@@ -78,23 +78,23 @@ functions: *convert_abc*, where *abc* is the three letter abbreviation
 of the given datasource, which does common manipulations on a given
 datasource. Brief description of these can be found below:
 
--   **convert_dia**: Search for given diagnosis code type and code pairs
-    among registered diagnoses.
--   **convert_enc**: Converts columns with ICD data to simple ICD codes
-    and adds boolean columns corresponding to diseases if requested.
--   **convert_lab**: Converts lab results to normal/abnormal based-on
-    reference values.
--   **convert_med**: Adds boolean columns corresponding to a group of
-    medications if they are present.
--   **convert_rfv**: Search for given reason for visit codes among
-    registered encounters.
--   **convert_phy**: Search for given health history codes among
-    registered encounters.
--   **convert_prc**: Search for given procedure codes among registered
-    encounters.
--   **convert_notes**: Parses information from the free text notes and
-    provides the text in additional columns for all types of notes:
-    *car, dis, end, hnp, opn, pat, prg, pul, rad, vis and lno*.
+- **convert_dia**: Search for given diagnosis code type and code pairs
+  among registered diagnoses.
+- **convert_enc**: Converts columns with ICD data to simple ICD codes
+  and adds boolean columns corresponding to diseases if requested.
+- **convert_lab**: Converts lab results to normal/abnormal based-on
+  reference values.
+- **convert_med**: Adds boolean columns corresponding to a group of
+  medications if they are present.
+- **convert_rfv**: Search for given reason for visit codes among
+  registered encounters.
+- **convert_phy**: Search for given health history codes among
+  registered encounters.
+- **convert_prc**: Search for given procedure codes among registered
+  encounters.
+- **convert_notes**: Parses information from the free text notes and
+  provides the text in additional columns for all types of notes: *car,
+  dis, end, hnp, opn, pat, prg, pul, rad, vis and lno*.
 
 Furthermore, **parseRPDR** provides the *create_img_db* function which
 creates a database from the headers of the DICOM images present in the
@@ -109,25 +109,24 @@ Besides these functions, there are ones that are not connected to
 specific datasources and provide other commonly used functionalities.
 Brief description of these can be found below:
 
--   **load_all_data**: Load all RPDR datasources into a single list.
--   **pretty_mrn**: Convert a string vector to RPDR compatible MRN
-    format according to different institutional requirements.
--   **pretty_numbers**: Creates numerical strings with given lengths by
-    removing additional characters from the back and adding leading
-    zeros if necessary. Can be used to format zip codes and phone
-    numbers (done automatically by the load functions).
--   **pretty_text**: Removes spaces, special characters and capitals
-    from string vector and converts unknowns to NA.
--   **all_ids_mi2b2**: Legacy function, provides a list of all MGH or
-    BWH IDs that the patients had at any time of their visits to
-    Partners hospitals. This may be used for radiological image
-    downloads using mi2b2 as described later in the text.
--   **find_exam**: Find all, earliest or closest examination (i.e. lab)
-    to a given timepoint.
--   **export_notes**: Write out each individual report from loaded
-    notes.
+- **load_all_data**: Load all RPDR datasources into a single list.
+- **pretty_mrn**: Convert a string vector to RPDR compatible MRN format
+  according to different institutional requirements.
+- **pretty_numbers**: Creates numerical strings with given lengths by
+  removing additional characters from the back and adding leading zeros
+  if necessary. Can be used to format zip codes and phone numbers (done
+  automatically by the load functions).
+- **pretty_text**: Removes spaces, special characters and capitals from
+  string vector and converts unknowns to NA.
+- **all_ids_mi2b2**: Legacy function, provides a list of all MGH or BWH
+  IDs that the patients had at any time of their visits to Partners
+  hospitals. This may be used for radiological image downloads using
+  mi2b2 as described later in the text.
+- **find_exam**: Find all, earliest or closest examination (i.e. lab) to
+  a given timepoint.
+- **export_notes**: Write out each individual report from loaded notes.
 
-## Parallelization and shared RAM management in parseRPDR
+## Parallelization in parseRPDR
 
 All functionalities of **parseRPDR** are parallelized to assist the
 analysis of large datasets. The user does not need to know anything of
@@ -138,16 +137,8 @@ application. By default nThread is set to parallel::detectCores()-1,
 which means that all except one of the threads on the given machine will
 be used. Be aware that parallelization also requires additional memory
 to run the functions. Setting *nThread=1* results in sequential
-analysis, which might be beneficial for small datasets.
-
-In case of the *find_exam* function, there is an opportunity to use
-shared RAM management. In case of large datasets (>1M rows), this may
-provide more efficient RAM management. However, this also results in
-slower run times, but on the other hand may allow to run the search
-process on more threads. The balance needs to be determined empirically
-for each machine, but as a rule of thumb, if the datasets supplied to
-*find_exam* do not exceed 1M rows then shared RAM management is not
-beneficial.
+analysis, which might be beneficial for small datasets. All
+parallelizations are done using dynamic load balancing.
 
 *NOTE!!!*
 
@@ -164,9 +155,9 @@ The first step of most analyses is requesting data from RPDR.
 
 RPDR provides three main data sources:
 
--   Detailed patient information
--   Radiological images
--   Biological specimen data
+- Detailed patient information
+- Radiological images
+- Biological specimen data
 
 **parseRPDR** supports the analysis of detailed patient information text
 files which can be requested separately, in conjunction with a
@@ -174,8 +165,8 @@ radiological image or biological specimen data request.
 
 There are two main ways to request data from RPDR:
 
--   Using the built in patient query tool
--   Using a known list of MRNs
+- Using the built in patient query tool
+- Using a known list of MRNs
 
 If we have a known list of MRNs, first we need to format them according
 to the standards of RPDR. **parseRPDR** provides the *pretty_mrn*
@@ -256,26 +247,26 @@ are satisfactory and only the location of the data is needed to be
 specified. Nevertheless, the arguments provide full flexibility if
 needed.
 
--   *file*: Full file path to the given .txt.
--   *merge_id*: Column name of ID to use to create ID_MERGE column which
-    should be used later for merging different datasources. Defaults to
-    EMPI as it is available for all datasources and is unique to each
-    patient.
--   *sep*: Divider between hospital ID and MRN. Used by the pretty_MRN
-    function. Defaults to “:” as it is most commonly used in RPDR and
-    the “:” does not carry additional meaning in conventional data
-    exports (such as “,” or “;” which can be column dividers).
--   *id_length*: Indicating whether to modify MRN length based-on
-    required values. Used by the pretty_MRN function.
--   *perc*: Number between 0-1 indicating which parsed ID columns to
-    keep. Data present in perc x 100% of patients are kept.
--   *na*: Whether to keep columns which only contain NA values.
--   *identical*: Whether to keep columns with identical values.
--   *nThread*: The number of threads to use for parallelization.
--   *mrn_type*: Whether columns MRN_Type and MRN should be parsed to
-    create ID columns. It is only advised in case of one datasource
-    (default is using the con.txt) as it unnecessarily increases
-    computational time.
+- *file*: Full file path to the given .txt.
+- *merge_id*: Column name of ID to use to create ID_MERGE column which
+  should be used later for merging different datasources. Defaults to
+  EMPI as it is available for all datasources and is unique to each
+  patient.
+- *sep*: Divider between hospital ID and MRN. Used by the pretty_MRN
+  function. Defaults to “:” as it is most commonly used in RPDR and the
+  “:” does not carry additional meaning in conventional data exports
+  (such as “,” or “;” which can be column dividers).
+- *id_length*: Indicating whether to modify MRN length based-on required
+  values. Used by the pretty_MRN function.
+- *perc*: Number between 0-1 indicating which parsed ID columns to keep.
+  Data present in perc x 100% of patients are kept.
+- *na*: Whether to keep columns which only contain NA values.
+- *identical*: Whether to keep columns with identical values.
+- *nThread*: The number of threads to use for parallelization.
+- *mrn_type*: Whether columns MRN_Type and MRN should be parsed to
+  create ID columns. It is only advised in case of one datasource
+  (default is using the con.txt) as it unnecessarily increases
+  computational time.
 
 ### *load_con* function
 
@@ -381,17 +372,17 @@ functions the program also provides functions to assist common tasks
 which are not dependent of a given datasource. The arguments are
 standard among the functions:
 
--   *code*: An array of column names in which the algorithm searches for
-    the given disease codes etc.
--   *codes_to_find*: A list of disease/medication etc. codes which are
-    searched for in *code* column.
--   *collapse*: A column name on which to collapse the data.table and
-    provide summary columns.
--   *code_time*: Used in case collapse is present, the column name of
-    the time column.
--   *aggr_type*: If multiple diagnoses/medications are present within
-    the same case of *collapse*, which timepoint to return. Supported
-    are: “earliest” or “latest”.
+- *code*: An array of column names in which the algorithm searches for
+  the given disease codes etc.
+- *codes_to_find*: A list of disease/medication etc. codes which are
+  searched for in *code* column.
+- *collapse*: A column name on which to collapse the data.table and
+  provide summary columns.
+- *code_time*: Used in case collapse is present, the column name of the
+  time column.
+- *aggr_type*: If multiple diagnoses/medications are present within the
+  same case of *collapse*, which timepoint to return. Supported are:
+  “earliest” or “latest”.
 
 ### *convert_enc* - Parsing ICD codes and finding disease diagnoses
 
@@ -402,15 +393,15 @@ indicator column whether that encounter has any of the ICD codes
 associated with that given disease. For this we need to specify the
 following arguments:
 
--   *d*:The data.table, loaded using load_enc.
--   *code*: An array of column names to convert, which contain ICD code
-    information.
--   *keep*: Whether to keep the original columns specified by cols.
--   *codes_to_find*: List of arrays corresponding to given disease
-    groups. The function searches the columns in cols and creates new
-    boolean indicator columns with names corresponding to the list
-    element names, and returns TRUE for rows where any of the given ICD
-    codes are present.
+- *d*:The data.table, loaded using load_enc.
+- *code*: An array of column names to convert, which contain ICD code
+  information.
+- *keep*: Whether to keep the original columns specified by cols.
+- *codes_to_find*: List of arrays corresponding to given disease groups.
+  The function searches the columns in cols and creates new boolean
+  indicator columns with names corresponding to the list element names,
+  and returns TRUE for rows where any of the given ICD codes are
+  present.
 
 The function returns the data.table provided in the argument *d* with
 the new parse ICD columns starting with ICD\_ and also the original ICD
@@ -517,7 +508,7 @@ Laboratory results can be loaded using the *load_lab* function. However,
 RPDR only provides the raw results of the tests (i.e. \<0.03), which
 make it difficult to use for later analyses. **parseRPDR** provides the
 *convert_lab* function, which converts the results to numerical values.
-This is done by replacing x\< or x> notations with the value x, as the
+This is done by replacing x\< or x\> notations with the value x, as the
 only thing we know certainly is that the values is not larger or smaller
 then the boundary value. When ranges are returned, then the upper bound
 of the range is provided. Also, qualitative results are converted to
@@ -629,45 +620,43 @@ find the earliest, closest or all the examinations within a given
 timeframe of an event or encounter. The function runs the search in
 parallel on multiple threads which can be specified using nThread. If it
 is set to 1, then no parallel backends are created and the function is
-executed sequentially. The function allows flexibility using its input
-arguments:
+executed sequentially. A progress bar is also reported in the terminal.
+The function allows flexibility using its input arguments:
 
--   *d_from*: Data.table which contains the examination data, from which
-    we are looking for examinations complying to the criteria specified
-    by the arguments.
--   *d_to*: Data.table which contains the encounter or event information
-    to which we are trying to find examinations complying to the
-    criteria specified by the arguments.
--   *d_from_ID*: The column name of the ID column in d_from used to
-    connect the cases between the two data.tables.
--   *d_to_ID*: The column name of the ID column in d_to used to connect
-    the cases between the two data.tables.
--   *d_from_time*: The column name of the time variable in d_from used
-    to calculate the time difference between the two data.tables.
--   *d_to_time*: The column name of the variable in d_to used to
-    calculate the time difference between the two data.tables.
--   *time_diff_name*: The column name of a new column that is created
-    which will hold the time difference between the exam and encounter.
--   *before*: Whether to look for examination in d_from, which occurred
-    before the given time in d_to.
--   *after*: Whether to look for examination in d_from, which occurred
-    after the given time in d_to.
--   *time*: The time difference that is accepted between the examination
-    and the encounter.
--   *time_unit*: The time unit used to calculate differences by
-    timediff. “secs”, “mins”, “hours”, “days” and “weeks” are supported.
--   *add_column*: Optional, the name of the column in d_to which can be
-    added to the output.
--   *keep_data*: Whether to include empty rows with only the ID column
-    filed out for cases that have data in the d_from, but not within the
-    time range.
--   *nThread*: The number of threads to use for parallel computing.
--   *shared_RAM*: Whether shared RAM management should be used during
-    parallelization. Default is FALSE. In case of large datasets (>1M
-    rows) and running on server machines, it might be beneficial to have
-    shared memory access between the threads. This slows things down,
-    but also means that not all datasets need to be copied for each
-    worker, therefore more threads can be utilized.
+- *d_from*: Data.table which contains the examination data, from which
+  we are looking for examinations complying to the criteria specified by
+  the arguments.
+- *d_to*: Data.table which contains the encounter or event information
+  to which we are trying to find examinations complying to the criteria
+  specified by the arguments.
+- *d_from_ID*: The column name of the ID column in d_from used to
+  connect the cases between the two data.tables.
+- *d_to_ID*: The column name of the ID column in d_to used to connect
+  the cases between the two data.tables.
+- *d_from_time*: The column name of the time variable in d_from used to
+  calculate the time difference between the two data.tables.
+- *d_to_time*: The column name of the variable in d_to used to calculate
+  the time difference between the two data.tables.
+- *time_diff_name*: The column name of a new column that is created
+  which will hold the time difference between the exam and encounter.
+- *before*: Whether to look for examination in d_from, which occurred
+  before the given time in d_to.
+- *after*: Whether to look for examination in d_from, which occurred
+  after the given time in d_to.
+- *time*: The time difference that is accepted between the examination
+  and the encounter.
+- *time_unit*: The time unit used to calculate differences by timediff.
+  “secs”, “mins”, “hours”, “days” and “weeks” are supported.
+- *add_column*: Optional, the name of the column in d_to which can be
+  added to the output.
+- *keep_data*: Whether to include empty rows with only the ID column
+  filed out for cases that have data in the d_from, but not within the
+  time range.
+- *nThread*: The number of threads to use for parallel computing.
+- *shared_RAM*: Depreciated from version 1.1.0 onwards, only kept for
+  compatibility, as Bigmemory package has issues on running on different
+  operating systems. Now all computations are run using the memory usage
+  specifications of the paralellization strategy.
 
 Here we present example cases of using the function to locate
 radiological examinations within a timeframe of given encounters.
@@ -683,7 +672,7 @@ rdt_ED <- find_exam(d_from = data_rdt, d_to = data_enc_ED,
                     d_from_time = "time_rdt_exam", d_to_time = "time_enc_admit",
                     time_diff_name = "time_diff_ED_rdt", before = TRUE, after = TRUE,
                     time = 3, time_unit = "days", multiple = "all",
-                    nThread = 2, shared_RAM = FALSE)
+                    nThread = 2)
 
 #Find earliest radiological examinations within 3 day of the ED registration
 rdt_ED <- find_exam(d_from = data_rdt, d_to = data_enc_ED,
@@ -691,7 +680,7 @@ rdt_ED <- find_exam(d_from = data_rdt, d_to = data_enc_ED,
                     d_from_time = "time_rdt_exam", d_to_time = "time_enc_admit",
                     time_diff_name = "time_diff_ED_rdt", before = TRUE, after = TRUE,
                     time = 3, time_unit = "days", multiple = "earliest",
-                    nThread = 2, shared_RAM = FALSE)
+                    nThread = 2)
 
 #Find closest radiological examinations on or after 1 day of the ED registration
 #and add primary diagnosis column from encounters
@@ -700,7 +689,7 @@ rdt_ED <- find_exam(d_from = data_rdt, d_to = data_enc_ED,
                     d_from_time = "time_rdt_exam", d_to_time = "time_enc_admit",
                     time_diff_name = "time_diff_ED_rdt", before = FALSE, after = TRUE,
                     time = 1, time_unit = "days", multiple = "earliest",
-                    add_column = "enc_diag_princ", nThread = 2, shared_RAM = FALSE)
+                    add_column = "enc_diag_princ", nThread = 2)
 
 #Find closest radiological examinations on or after 1 day of the ED registration but
 #also provide empty rows for patients with exam data but not within the timeframe
@@ -710,7 +699,7 @@ rdt_ED <- find_exam(d_from = data_rdt, d_to = data_enc_ED,
                     time_diff_name = "time_diff_ED_rdt", before = FALSE, after = TRUE,
                     time = 1, time_unit = "days", multiple = "earliest",
                     add_column = "enc_diag_princ", keep_data = TRUE,
-                    nThread = 2, shared_RAM = FALSE)
+                    nThread = 2)
 ```
 
 The function only supports intervals following up to or beginning at the

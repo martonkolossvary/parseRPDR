@@ -20,4 +20,3 @@ data table, with data.
 \description{
 Delete columns where all data elements are NA or the same.
 }
-\keyword{internal}

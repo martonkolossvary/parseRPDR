@@ -48,11 +48,16 @@ convert_enc <- function(d, code = c("enc_diag_admit", "enc_diag_princ", paste0("
   #Initialize multicore
   if(nThread == 1 | length(codes_to_find) == 1) {
     `%exec%` <- foreach::`%do%`
+    future::plan(future::sequential)
   } else {
     if(length(codes_to_find) > 0 & length(codes_to_find) < nThread) {nThread <- length(codes_to_find)}
-    cl <- parallel::makeCluster(nThread, methods = FALSE, useXDR = FALSE)
-    doParallel::registerDoParallel(cl)
-    `%exec%` <- foreach::`%dopar%`
+
+    if(parallelly::supportsMulticore()) {
+      future::plan(future::multicore, workers = nThread)
+    } else {
+      future::plan(future::multisession, workers = nThread)
+    }
+    `%exec%` <- doFuture::`%dofuture%`
   }
 
   #Create ICD codes
@@ -74,7 +79,7 @@ convert_enc <- function(d, code = c("enc_diag_admit", "enc_diag_princ", paste0("
 
     #Find diagnoses per row
     result <- foreach::foreach(i = 1:length(codes_to_find), .combine="cbind",
-                               .inorder=TRUE,
+                               .inorder=TRUE, .options.future = list(chunk.size = 1.0),
                                .errorhandling = c("pass"), .verbose=FALSE) %exec%
       {
         if(is.null(collapse)) {
@@ -99,7 +104,7 @@ convert_enc <- function(d, code = c("enc_diag_admit", "enc_diag_princ", paste0("
           diag_coll
         }
       }
-    if(exists("cl") & nThread>1) {parallel::stopCluster(cl)}
+    future::plan(future::sequential)
 
     if(is.null(collapse)) { #Remove unnecessary info and combine with original data if non-collapse
       result <- cbind(d, result)
@@ -109,7 +114,7 @@ convert_enc <- function(d, code = c("enc_diag_admit", "enc_diag_princ", paste0("
     }
     return(result)
   } else { #If no diagnoses
-    if(exists("cl") & nThread>1) {parallel::stopCluster(cl)}
+    future::plan(future::sequential)
     return(d)
   }
 }

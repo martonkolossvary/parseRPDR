@@ -6,7 +6,7 @@
 ## Date: 2023-03-11
 ###############################################################################
 
-# testthat::skip_if_offline()
+testthat::skip_if_offline()
 # Load and check equality ====================
 
 suppressPackageStartupMessages(library(parseRPDR))

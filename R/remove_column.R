@@ -1,5 +1,5 @@
 #' @title Delete columns with all NA or all identical data.
-#' @keywords internal
+#' @export
 #'
 #' @description Delete columns where all data elements are NA or the same.
 #'

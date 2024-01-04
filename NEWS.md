@@ -1,5 +1,20 @@
 # Change log
 
+## parseRPDR 1.1.0 - 2024/01/03
+-   Changed parallelization backend to use future and doFuture
+    package instead of parallel package. This allows for
+    more optimal parallelization on all operating systems.
+    All parallelizations now use dynamic load balancing.
+    
+-   Removed Bigmemory version of find_exam function due to
+    incompatibilities and stability issues.
+    
+-   Added progress bar to find_exam function to allow
+    users to track progress of the function, even when
+    parallelization is used.
+    
+-   Small bug fixes not affecting functionality.
+    
 ## parseRPDR 1.0.1 - 2023/03/31
 -   Added export_notes function which provides a 
     convenience function to write out each report

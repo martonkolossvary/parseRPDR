@@ -6,7 +6,7 @@
 ## Date: 2023-02-24
 ###############################################################################
 
-# testthat::skip_if_offline()
+testthat::skip_if_offline()
 # Check equality ====================
 
 suppressPackageStartupMessages(library(parseRPDR))
@@ -81,4 +81,13 @@ test_that("pretty_mrn if numbers more than needed, but unchanged, different sep 
   expect_equal(pretty_mrn(1234567890123, prefix = "EMPI", sep = "__", id_length = "asis", nThread = 1), "EMPI__1234567890123")
   expect_equal(pretty_mrn(1234567890123, prefix = "PMRN", sep = "__", id_length = "asis", nThread = 1), "PMRN__1234567890123")
   expect_equal(pretty_mrn(1234567890123, prefix = "ABC", sep = "__", id_length = "asis", nThread = 1), "ABC__1234567890123")
+})
+
+test_that("pretty_mrn if multiple length prefix", {
+  expect_equal(pretty_mrn(rep(1234567890123, 1000), prefix = rep("MGH", 1000), sep = "__", id_length = "asis", nThread = 1), rep("MGH__1234567890123", 1000))
+  expect_equal(pretty_mrn(rep(1234567890123, 1000), prefix = rep("BWH", 1000), sep = "__", id_length = "asis", nThread = 2), rep("BWH__1234567890123", 1000))
+  expect_equal(pretty_mrn(rep(1234567890123, 1000), prefix = rep("MCL", 1000), sep = "__", id_length = "asis", nThread = 1), rep("MCL__1234567890123", 1000))
+  expect_equal(pretty_mrn(rep(1234567890123, 1000), prefix = rep("EMPI", 1000), sep = "__", id_length = "asis", nThread = 2), rep("EMPI__1234567890123", 1000))
+  expect_equal(pretty_mrn(rep(1234567890123, 1000), prefix = rep("PMRN", 1000), sep = "__", id_length = "asis", nThread = 1), rep("PMRN__1234567890123", 1000))
+  expect_equal(pretty_mrn(rep(1234567890123, 1000), prefix = rep("ABC", 1000), sep = "__", id_length = "asis", nThread = 2), rep("ABC__1234567890123", 1000))
 })

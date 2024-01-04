@@ -41,11 +41,16 @@ convert_med <- function(d, code = "med", codes_to_find = NULL, collapse = NULL,
   #Initialize multicore
   if(nThread == 1 | length(codes_to_find) == 1) {
     `%exec%` <- foreach::`%do%`
+    future::plan(future::sequential)
   } else {
     if(length(codes_to_find) > 0 & length(codes_to_find) < nThread) {nThread <- length(codes_to_find)}
-    cl <- parallel::makeCluster(nThread, methods = FALSE, useXDR = FALSE)
-    doParallel::registerDoParallel(cl)
-    `%exec%` <- foreach::`%dopar%`
+
+    if(parallelly::supportsMulticore()) {
+      future::plan(future::multicore, workers = nThread)
+    } else {
+      future::plan(future::multisession, workers = nThread)
+    }
+    `%exec%` <- doFuture::`%dofuture%`
   }
 
   #Create columns
@@ -56,7 +61,7 @@ convert_med <- function(d, code = "med", codes_to_find = NULL, collapse = NULL,
   message(paste0("Finding medications."))
 
   result <- foreach::foreach(i = 1:length(codes_to_find), .combine="cbind",
-                             .inorder=TRUE,
+                             .inorder=TRUE, .options.future = list(chunk.size = 1.0, globals = structure(TRUE, add = "comb")),
                              .errorhandling = c("pass"), .verbose=FALSE) %exec%
     {
       reg_exp <- paste(unlist(codes_to_find[i]), collapse="|")
@@ -86,7 +91,7 @@ convert_med <- function(d, code = "med", codes_to_find = NULL, collapse = NULL,
       }
     }
 
-  if(exists("cl") & nThread>1) {parallel::stopCluster(cl)}
+  future::plan(future::sequential)
 
   if(is.null(collapse)) { #Remove unnecessary info and combine with original data if non-collapse
     result <- cbind(d, result)

@@ -3,7 +3,7 @@
 \encoding{UTF-8}
 \name{find_exam}
 \alias{find_exam}
-\title{Find exam data within a given timeframe using parallel CPU computing and possibly shared RAM management.}
+\title{Find exam data within a given timeframe using parallel CPU computing.}
 \usage{
 find_exam(
   d_from,
@@ -60,11 +60,8 @@ In case of ties for \emph{closest} or \emph{earliest}, all are returned. Default
 
 \item{nThread}{integer, number of threads to use for parallelization. If it is set to 1, then no parallel backends are created and the function is executed sequentially.}
 
-\item{shared_RAM}{boolean, whether to use shared memory during parallelization using the \emph{bigmemory} package. This allows to process \emph{d_from} and/or \emph{d_to} datasets with >1M rows.
-Be aware that shared RAM usually results in slower run times, therefore by default it is set to \emph{FALSE},
-but it allows to run more threads when the datasets are large providing overall faster run times.
-Be aware that the optimal number of clusters might be different setting it to TRUE or FALSE, and this has to be determined empirically per machine.
-The feature is very unstable and therefore should only be tried if there is no other option}
+\item{shared_RAM}{boolean, depreciated from version 1.1.0 onwards, only kept for compatibility, as Bigmemory package has issues on running on different operating systems.
+Now all computations are run using the memory usage specifications of the paralellization strategy.}
 }
 \value{
 data table, with \emph{d_from} filtered to ones only within the timeframe. The columns of \emph{d_from} are returned with the corresponding time column in \emph{data_to}
@@ -74,7 +71,7 @@ Also the time column from \emph{d_to} specified by \emph{d_to_time} is returned 
 An additional column specified in \emph{add_column} may be added from \emph{data_to} to the data table.
 }
 \description{
-Finds all, earliest or closest examination to a given timepoints using parallel computing
+Finds all, earliest or closest examination to a given timepoints using parallel computing. A progress bar is also reported in the terminal to show the progress of the computation.
 }
 \examples{
 \dontrun{
@@ -87,14 +84,14 @@ rdt_ED <- find_exam(d_from = data_rdt, d_to = data_enc_ED,
 d_from_ID = "ID_MERGE", d_to_ID = "ID_MERGE",
 d_from_time = "time_rdt_exam", d_to_time = "time_enc_admit", time_diff_name = "time_diff_ED_rdt",
 before = TRUE, after = TRUE, time = 3, time_unit = "days", multiple = "all",
-nThread = 2, shared_RAM = FALSE)
+nThread = 2)
 
 #Find earliest radiological examinations within 3 day of the ED registration
 rdt_ED <- find_exam(d_from = data_rdt, d_to = data_enc_ED,
 d_from_ID = "ID_MERGE", d_to_ID = "ID_MERGE",
 d_from_time = "time_rdt_exam", d_to_time = "time_enc_admit", time_diff_name = "time_diff_ED_rdt",
 before = TRUE, after = TRUE, time = 3, time_unit = "days", multiple = "earliest",
-nThread = 2, shared_RAM = FALSE)
+nThread = 2)
 
 #Find closest radiological examinations on or after 1 day of the ED registration
 #and add primary diagnosis column from encounters
@@ -102,7 +99,7 @@ rdt_ED <- find_exam(d_from = data_rdt, d_to = data_enc_ED,
 d_from_ID = "ID_MERGE", d_to_ID = "ID_MERGE",
 d_from_time = "time_rdt_exam", d_to_time = "time_enc_admit", time_diff_name = "time_diff_ED_rdt",
 before = FALSE, after = TRUE, time = 1, time_unit = "days", multiple = "earliest",
-add_column = "enc_diag_princ", nThread = 2, shared_RAM = FALSE)
+add_column = "enc_diag_princ", nThread = 2)
 
 #Find closest radiological examinations on or after 1 day of the ED registration
 #but also provide empty rows for patients with exam data but not within the timeframe
@@ -110,6 +107,6 @@ rdt_ED <- find_exam(d_from = data_rdt, d_to = data_enc_ED,
 d_from_ID = "ID_MERGE", d_to_ID = "ID_MERGE",
 d_from_time = "time_rdt_exam", d_to_time = "time_enc_admit", time_diff_name = "time_diff_ED_rdt",
 before = FALSE, after = TRUE, time = 1, time_unit = "days", multiple = "earliest",
-add_column = "enc_diag_princ", keep_data = TRUE nThread = 2, shared_RAM = FALSE)
+add_column = "enc_diag_princ", keep_data = TRUE nThread = 2)
 }
 }

@@ -1,12 +1,12 @@
-###############################################################################
-## Title: Test load_all_data() function
-## Project: parseRPDR
-## Description: Test load_all_data() function
-## Copyright: Márton Kolossváry, MD, PhD
-## Date: 2023-02-24
-###############################################################################
+# ###############################################################################
+# ## Title: Test load_all_data() function
+# ## Project: parseRPDR
+# ## Description: Test load_all_data() function
+# ## Copyright: Márton Kolossváry, MD, PhD
+# ## Date: 2023-02-24
+# ###############################################################################
 
-# testthat::skip_if_offline()
+testthat::skip_if_offline()
 # Load and check equality ====================
 
 suppressPackageStartupMessages(library(parseRPDR))
@@ -15,8 +15,8 @@ folder_raw   <- paste0(folder_wd, "RAW/")
 folder_parse <-  paste0(folder_wd, "PARSE/")
 OVERWRITE    <- TRUE
 
-## Check sequential vs. parallel loads -----
-### Check load_dem_old() ---
+# Check sequential vs. parallel loads -----
+## Check load_dem_old() ---
 expect_true({
   d_p1 <- suppressMessages(load_all_data(folder = paste0(folder_raw, "LEGACY/"), which_data = c("dem", "lab", "enc", "dia", "prc", "med"), nThread = 2,
                                          many_sources = TRUE, load_report = TRUE, format_orig = FALSE, old_dem = TRUE))
@@ -26,7 +26,7 @@ expect_true({
                                          many_sources = FALSE, load_report = TRUE, format_orig = FALSE, old_dem = TRUE))
   d_s1 <- suppressMessages(load_all_data(folder = paste0(folder_raw, "LEGACY/"), which_data = c("enc"), nThread = 2,
                                          many_sources = TRUE, load_report = TRUE, format_orig = FALSE, old_dem = TRUE))
-  if(!(is.null(d_p1) | is.null(d_p2) | is.null(d_p3) | is.null(d_s1))) TRUE
+  if(!(is.null(d_p1) | is.null(d_p2) | is.null(d_p3) | is.null(d_s1))) {TRUE}
 })
 
 ### Check with default values
