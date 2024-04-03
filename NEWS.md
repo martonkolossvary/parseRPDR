@@ -1,5 +1,8 @@
 # Change log
 
+## parseRPDR 1.1.1 - 2024/04/02
+-   Bug fix in load_all_data function for notes data.
+
 ## parseRPDR 1.1.0 - 2024/01/03
 -   Changed parallelization backend to use future and doFuture
     package instead of parallel package. This allows for

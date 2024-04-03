@@ -29,7 +29,7 @@ expect_true({
 
 ## Compare loaded data with legacy data -----
 expect_true({
-  date_cols <- colnames(c_s)[which(as.vector(c_s[,lapply(.SD, class)])[1,] == "POSIXct")]
+  date_cols <- colnames(c_s)[which(as.vector(c_s[,lapply(.SD, class)][1,]) == "POSIXct")]
   suppressWarnings(c_s[,(date_cols):= lapply(.SD, as.character), .SDcols = date_cols])
   c_s[is.na(c_s)] <- ""
   #c_s[] <- lapply(c_s, gsub, pattern = '"', replacement = '')

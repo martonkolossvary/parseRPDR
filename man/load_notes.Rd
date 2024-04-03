@@ -67,7 +67,7 @@ data table, with notes information. \emph{abc} stands for the three letter abbre
 }
 \description{
 Loads documents information into the R environment, which are:
-\itemize{
+\describe{
 \item{Cardiology: }{"car"}
 \item{Discharge: }{"dis"}
 \item{Endoscopy: }{"end"}

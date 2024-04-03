@@ -43,7 +43,7 @@ test_that("create_img_db run using sequential and parallel loading returns same 
 ## Compare loaded data with legacy data -----
 ### Convert dates to text and remove NAs
 expect_true({
-  date_cols <- colnames(d_s)[which(as.vector(d_s[,lapply(.SD, class)])[1,] == "POSIXct")]
+  date_cols <- colnames(d_s)[which(as.vector(d_s[,lapply(.SD, class)][1,]) == "POSIXct")]
   suppressWarnings(d_s[,(date_cols):= lapply(.SD, as.character), .SDcols = date_cols])
   d_s[is.na(d_s)] <- ""
   #d_s[] <- lapply(d_s, gsub, pattern = '"', replacement = '')
@@ -64,7 +64,7 @@ test_that("Compare loaded data with legacy data", {
 
 ### Convert dates to text and remove NAs
 expect_true({
-  date_cols <- colnames(d_s_sum)[which(as.vector(d_s_sum[,lapply(.SD, class)])[1,] == "POSIXct")]
+  date_cols <- colnames(d_s_sum)[which(as.vector(d_s_sum[,lapply(.SD, class)][1,]) == "POSIXct")]
   suppressWarnings(d_s_sum[,(date_cols):= lapply(.SD, as.character), .SDcols = date_cols])
   d_s_sum[is.na(d_s_sum)] <- ""
   #d_s_sum[] <- lapply(d_s_sum, gsub, pattern = '"', replacement = '')

@@ -41,7 +41,7 @@ for(i in 1) {
   ## Compare loaded data with legacy data -----
   ### Convert dates to text and remove NAs
   expect_true({
-    date_cols <- colnames(d_s)[which(as.vector(d_s[,lapply(.SD, class)])[1,] == "POSIXct")]
+    date_cols <- colnames(d_s)[which(as.vector(d_s[,lapply(.SD, class)][1,]) == "POSIXct")]
     suppressWarnings(d_s[,(date_cols):= lapply(.SD, as.character), .SDcols = date_cols])
     d_s[is.na(d_s)] <- ""
     #d_s[] <- lapply(d_s, gsub, pattern = '"', replacement = '')

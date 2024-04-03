@@ -67,7 +67,7 @@ test_that("convert_phy summarizing using sequential and parallel loading returns
 
 ## Compare loaded data with legacy data -----
 expect_true({
-  date_cols <- colnames(c_s)[which(as.vector(c_s[,lapply(.SD, class)])[1,] == "POSIXct")]
+  date_cols <- colnames(c_s)[which(as.vector(c_s[,lapply(.SD, class)][1,]) == "POSIXct")]
   suppressWarnings(c_s[,(date_cols):= lapply(.SD, as.character), .SDcols = date_cols])
   c_s[is.na(c_s)] <- ""
   #c_s[] <- lapply(c_s, gsub, pattern = '"', replacement = '')
@@ -85,7 +85,7 @@ test_that("Compare loaded data with legacy data", {
 })
 
 expect_true({
-  date_cols <- colnames(c_s_sum)[which(as.vector(c_s_sum[,lapply(.SD, class)])[1,] == "POSIXct")]
+  date_cols <- colnames(c_s_sum)[which(as.vector(c_s_sum[,lapply(.SD, class)][1,]) == "POSIXct")]
   suppressWarnings(c_s_sum[,(date_cols):= lapply(.SD, as.character), .SDcols = date_cols])
   c_s_sum[is.na(c_s_sum)] <- ""
   #c_s_sum[] <- lapply(c_s_sum, gsub, pattern = '"', replacement = '')

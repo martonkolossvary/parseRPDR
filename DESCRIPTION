@@ -1,8 +1,8 @@
 Package: parseRPDR
 Type: Package
 Title: Parse and Manipulate Research Patient Data Registry ('RPDR') Text Queries
-Version: 1.1.0
-Date: 2024-01-04
+Version: 1.1.1
+Date: 2024-04-02
 Authors@R: person("Marton", "Kolossvary", role = c("aut", "cre"), email = "mkolossvary@mgh.harvard.edu")
 Maintainer: Marton Kolossvary <mkolossvary@mgh.harvard.edu>
 Description: Functions to load Research Patient Data Registry ('RPDR') text queries from Partners Healthcare institutions into R.
@@ -11,9 +11,9 @@ Description: Functions to load Research Patient Data Registry ('RPDR') text quer
              from the downloaded images. All functionalities are parallelized for fast and efficient analyses.
 License: AGPL (>= 3)
 Depends: R (>= 4.0)
-Imports: data.table (>= 1.13.2), stringr (>= 1.4.0), readr (>= 1.4.0), parallelly (>= 1.36.0),
-         doParallel (>= 1.0.16), foreach (>= 1.5.1), future (>= 1.33.1), doFuture (>= 1.0.1), progressr (>= 0.14.0)
-RoxygenNote: 7.2.3
+Imports: data.table (>= 1.14.1), stringr (>= 1.4.0), readr (>= 1.4.0), parallelly (>= 1.36.0),
+         foreach (>= 1.5.1), future (>= 1.33.1), doFuture (>= 1.0.1), progressr (>= 0.14.0)
+RoxygenNote: 7.3.1
 NeedsCompilation: no
 Suggests: 
     testthat (>= 3.0.0),

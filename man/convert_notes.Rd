@@ -32,7 +32,7 @@ Each column will contain the text between the given anchor point and the next fo
 This way the free text report is split into corresponding smaller texts. By default, these are the common standard elements of given note types.
 Here are provided potential anchor points for the given types of notes:
 
-\itemize{
+\describe{
 \item{Cardiology: }{c("Report Number:", "Report Status:", "Type:", "Date:", "Ordering Provider:", "SYSTOLIC BLOOD PRESSURE",  "DIASTOLIC BLOOD PRESSURE", "VENTRICULAR RATE EKG/MIN", "ATRIAL RATE", "PR INTERVAL", "QRS DURATION", "QT INTERVAL", "QTC INTERVAL",  "P AXIS", "R AXIS", "T WAVE AXIS", "LOC", "DX:", "REF:", "Electronically Signed", "report_end")}
 \item{Discharge: }{c("***This text report", "Patient Information", "Physician Discharge Summary", "Surgeries this Admission", "Items for Post-Hospitalization Follow-Up:", "Pending Results", "Hospital Course", "ED Course:", "Diagnosis", "Prescriptions prior to admission", "Family History:", "Physical Exam on Admission:", "Discharge Exam", "report_end")}
 \item{Endoscopy: }{c("NAME:", "DATE:", "Patient Information", "report_end")}

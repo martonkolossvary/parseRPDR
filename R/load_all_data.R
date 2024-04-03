@@ -21,7 +21,7 @@
 #' If there are many datasources, then it is advised to set this TRUE, as then each different datasource will be processed in parallel.
 #' However, if there are only a few datasources selected to load, but many files per datasource (result of large queries), then it may be faster to parallelize within each datasource and therefore should be set to \emph{FALSE}.
 #' If there are only a few sources each with one file then set to TRUE.
-#' @param load_report boolean, should the report text be returned for notes.
+#' @param load_report boolean, should the report text be returned for notes. Defaults to \emph{TRUE}.
 #' @param format_orig boolean, should report be returned in its original formatting or should white spaces used for formatting be removed. Defaults to \emph{FALSE}.
 #'
 #' @return list of parsed data tables containing the information.
@@ -123,8 +123,8 @@ load_all_data <- function(folder, which_data = c("mrn", "con", "dem", "all", "bi
                                                   "id_length = \"", id_length, "\", ",
                                                   "perc = ", perc, ", ",
                                                   "nThread = ", 1, ", ",
-                                                  "load_report = \"", load_report, "\", ",
-                                                  "format_orig = \"", format_orig, "\", ",
+                                                  "load_report = ", load_report , ", ",
+                                                  "format_orig = ", format_orig, ", ",
                                                   "na = FALSE, identical = FALSE)")))
               } else {
                 func <- grep(type, x = tolower(load_functions), value = TRUE, fixed = TRUE)
@@ -218,8 +218,8 @@ load_all_data <- function(folder, which_data = c("mrn", "con", "dem", "all", "bi
                                                   "id_length = \"", id_length, "\", ",
                                                   "perc = ", perc, ", ",
                                                   "nThread = ", 1, ", ",
-                                                  "load_report = \"", load_report, "\", ",
-                                                  "format_orig = \"", format_orig, "\", ",
+                                                  "load_report = ", load_report , ", ",
+                                                  "format_orig = ", format_orig, ", ",
                                                   "na = FALSE, identical = FALSE)")))
               } else {
                 func <- grep(type, x = tolower(load_functions), value = TRUE, fixed = TRUE)

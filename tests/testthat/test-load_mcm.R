@@ -29,7 +29,7 @@ test_that("load_mcm run using sequential and parallel loading returns same resul
 ## Compare loaded data with legacy data -----
 ### Convert dates to text and remove NAs
 expect_true({
-  date_cols <- colnames(d_s)[which(as.vector(d_s[,lapply(.SD, class)])[1,] == "POSIXct")]
+  date_cols <- colnames(d_s)[which(as.vector(d_s[,lapply(.SD, class)][1,]) == "POSIXct")]
   suppressWarnings(d_s[,(date_cols):= lapply(.SD, as.character), .SDcols = date_cols])
   d_s[is.na(d_s)] <- ""
   #d_s[] <- lapply(d_s, gsub, pattern = '"', replacement = '')
@@ -41,7 +41,7 @@ expect_true({
 
 if(OVERWRITE | !file.exists(paste0(folder_parse, "mcm.csv"))) {data.table::fwrite(d_s, paste0(folder_parse, "mcm.csv"), row.names = FALSE)}
 l_s <- data.table::fread(paste0(folder_parse, "mcm.csv"), na.strings = "NA", strip.white = FALSE, colClasses = apply(d_s, 2, class))
-attr(l_s, "row.names") <- integer(0)
+# attr(l_s, "row.names") <- integer(0)
 
 
 test_that("Compare loaded data with legacy data", {

@@ -52,7 +52,7 @@ If there are many datasources, then it is advised to set this TRUE, as then each
 However, if there are only a few datasources selected to load, but many files per datasource (result of large queries), then it may be faster to parallelize within each datasource and therefore should be set to \emph{FALSE}.
 If there are only a few sources each with one file then set to TRUE.}
 
-\item{load_report}{boolean, should the report text be returned for notes.}
+\item{load_report}{boolean, should the report text be returned for notes. Defaults to \emph{TRUE}.}
 
 \item{format_orig}{boolean, should report be returned in its original formatting or should white spaces used for formatting be removed. Defaults to \emph{FALSE}.}
 }

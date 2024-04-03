@@ -46,3 +46,4 @@ l_s <- read.table(paste0(folder_parse, "all_ids_mi2b2_BWH.csv"), sep = ",", na.s
 test_that("Compare loaded data with legacy data", {
   expect_equal(l_s[[1]], c_bwh)
 })
+
