@@ -1,5 +1,8 @@
 # Change log
 
+## parseRPDR 1.1.2 - 2025/01/19
+-   Moved future options into functions.
+
 ## parseRPDR 1.1.1 - 2024/04/02
 -   Bug fix in load_all_data function for notes data.
 

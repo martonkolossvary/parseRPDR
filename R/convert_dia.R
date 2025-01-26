@@ -38,6 +38,7 @@ convert_dia <- function(d, code = "dia_code", code_type = "dia_code_type",  code
                         collapse = NULL, code_time = "time_dia", aggr_type = "earliest", nThread = parallel::detectCores()-1) {
 
   .SD=.N=.I=.GRP=.BY=.EACHI=..=..cols=.SDcols=i=j=time_to_db=..which_ids_to=..which_ids_from=combined=..collapse=. <- NULL
+  options(future.globals.maxSize = +Inf)
 
   #Initialize multicore
   if(nThread == 1 | length(codes_to_find) == 1) {
@@ -98,6 +99,7 @@ convert_dia <- function(d, code = "dia_code", code_type = "dia_code_type",  code
     result[, seq(4, dim(result)[2], 3)] <- NULL
   }
 
+  on.exit(options(future.globals.maxSize = 1.0 * 1e9))
   future::plan(future::sequential)
   return(result)
 }

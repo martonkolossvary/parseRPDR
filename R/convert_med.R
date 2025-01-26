@@ -37,6 +37,7 @@ convert_med <- function(d, code = "med", codes_to_find = NULL, collapse = NULL,
                         code_time = "time_med", aggr_type = "earliest", nThread = parallel::detectCores()-1) {
 
   .SD=.N=.I=.GRP=.BY=.EACHI=..=..cols=.SDcols=i=j=time_to_db=..which_ids_to=..which_ids_from=..collapse=. <- NULL
+  options(future.globals.maxSize = +Inf)
 
   #Initialize multicore
   if(nThread == 1 | length(codes_to_find) == 1) {
@@ -91,6 +92,7 @@ convert_med <- function(d, code = "med", codes_to_find = NULL, collapse = NULL,
       }
     }
 
+  on.exit(options(future.globals.maxSize = 1.0 * 1e9))
   future::plan(future::sequential)
 
   if(is.null(collapse)) { #Remove unnecessary info and combine with original data if non-collapse

@@ -71,7 +71,7 @@ convert_lab <- function(d, code_results = "lab_result", code_reference = "lab_re
   d_res_abn_pretty[w_lt] <- suppressWarnings(ifelse(as.numeric(d_res_pretty[w_lt]) > as.numeric(v_lt), "NORMAL", "ABNORMAL"))
 
   d_res_abn_pretty[w_range] <- suppressWarnings(ifelse(as.numeric(d_res_pretty[w_range]) > as.numeric(v_range_l) &
-                                      as.numeric(d_res_pretty[w_range]) < as.numeric(v_range_u), "NORMAL", "ABNORMAL"))
+                                                         as.numeric(d_res_pretty[w_range]) < as.numeric(v_range_u), "NORMAL", "ABNORMAL"))
   d_res_abn_pretty[d_res_pretty == "NEG" | d_res_pretty == "BORD"] <- "NORMAL"
   d_res_abn_pretty[d_res_pretty == "POS"] <- "ABNORMAL"
   d_res_abn_pretty[d_ref == d_res] <- "NORMAL"

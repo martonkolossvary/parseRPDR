@@ -42,6 +42,7 @@ load_all_data <- function(folder, which_data = c("mrn", "con", "dem", "all", "bi
                           merge_id = "EMPI", sep = ":", id_length = "standard", perc = 0.6, na = TRUE, identical = TRUE, nThread = parallel::detectCores()-1, many_sources = TRUE, load_report = TRUE, format_orig = FALSE) {
 
   .SD=.N=.I=.GRP=.BY=.EACHI=..=..cols=.SDcols=i=j=time_to_db=..which_ids_to=..which_ids_from <- NULL
+  options(future.globals.maxSize = +Inf)
 
   load_functions <- paste0("load_", which_data)
   load_functions[grep(paste0(c("car", "dis", "end", "hnp", "opn", "pat", "prg", "pul", "rad", "vis"), collapse = "|"), load_functions)] <- "load_notes" #Change to load_notes if needed
@@ -144,6 +145,7 @@ load_all_data <- function(folder, which_data = c("mrn", "con", "dem", "all", "bi
         result <- remove_column(dt = result, na = na, identical = identical) #remove columns if necessary
         result
       }
+    on.exit(options(future.globals.maxSize = 1.0 * 1e9))
     future::plan(future::sequential)
 
   } else { #Parallelize inner loop
@@ -235,6 +237,7 @@ load_all_data <- function(folder, which_data = c("mrn", "con", "dem", "all", "bi
               l_i
             }
           }
+        on.exit(options(future.globals.maxSize = 1.0 * 1e9))
         future::plan(future::sequential)
         result_inner <- data.table::rbindlist(result_inner, use.names = TRUE, fill = TRUE) #merge data sources
         result_inner <- remove_column(dt = result_inner, na = na, identical = identical) #remove columns if necessary

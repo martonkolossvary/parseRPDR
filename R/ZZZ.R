@@ -1,7 +1,4 @@
 .onAttach <- function(libname, pkgname) {
-  options(future.globals = TRUE)
-  options(future.globals.maxSize = +Inf)
-  options(future.chunk.size = 1.0)
   progressr::handlers(progressr::handler_progress(
     format   = ":spin [:bar] :percent in :elapsed ETA: :eta",
     complete = "="

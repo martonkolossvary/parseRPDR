@@ -11,6 +11,7 @@ find_exam_ram <- function(d_from, d_to,
                           multiple = "closest", add_column = NULL, keep_data = FALSE, nThread = parallel::detectCores()-1) {
 
   .SD=.N=.I=.GRP=.BY=.EACHI=..=..cols=.SDcols=i=j=time_to_db=..which_ids_to=..which_ids_from=..collapse <- NULL
+  options(future.globals.maxSize = +Inf)
 
   #Initialize multicore
   if(nThread == 1) {
@@ -108,6 +109,7 @@ find_exam_ram <- function(d_from, d_to,
       Exams
     }
 
+  on.exit(options(future.globals.maxSize = 1.0 * 1e9))
   future::plan(future::sequential)
   return(result)
 }

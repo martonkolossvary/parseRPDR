@@ -38,6 +38,7 @@ convert_prc <- function(d, code = "prc_code", code_type = "prc_code_type",  code
                         collapse = NULL, code_time = "time_prc", aggr_type = "earliest", nThread = parallel::detectCores()-1) {
 
   .SD=.N=.I=.GRP=.BY=.EACHI=..=..cols=.SDcols=i=j=time_to_db=..which_ids_to=..which_ids_from=combined=..collapse=. <- NULL
+  options(future.globals.maxSize = +Inf)
 
   #Initialize multicore
   if(nThread == 1 | length(codes_to_find) == 1) {
@@ -89,6 +90,7 @@ convert_prc <- function(d, code = "prc_code", code_type = "prc_code_type",  code
         diag_coll
       }
     }
+  on.exit(options(future.globals.maxSize = 1.0 * 1e9))
   future::plan(future::sequential)
 
   if(is.null(collapse)) { #Remove unnecessary info and combine with original data if non-collapse

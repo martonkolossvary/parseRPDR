@@ -36,6 +36,7 @@
 pretty_mrn <- function(v, prefix = "MGH", sep = ":", id_length = "standard", nThread = 1) {
 
   .SD=.N=.I=.GRP=.BY=.EACHI=..=..cols=.SDcols=i=j=time_to_db=..which_ids_to=..which_ids_from <- NULL
+  options(future.globals.maxSize = +Inf)
 
   #Initialize multicore
   if(nThread == 1) {
@@ -99,6 +100,7 @@ pretty_mrn <- function(v, prefix = "MGH", sep = ":", id_length = "standard", nTh
       v_out
     }
 
+  on.exit(options(future.globals.maxSize = 1.0 * 1e9))
   future::plan(future::sequential)
   return(result)
 }

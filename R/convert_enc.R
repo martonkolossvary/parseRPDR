@@ -44,6 +44,7 @@ convert_enc <- function(d, code = c("enc_diag_admit", "enc_diag_princ", paste0("
                         collapse = NULL, code_time = "time_enc_admit", aggr_type = "earliest", nThread = parallel::detectCores()-1) {
 
   .SD=.N=.I=.GRP=.BY=.EACHI=..=..code=.SDcols=i=j=time_to_db=..which_ids_to=..which_ids_from=..collapse=. <- NULL
+  options(future.globals.maxSize = +Inf)
 
   #Initialize multicore
   if(nThread == 1 | length(codes_to_find) == 1) {
@@ -104,6 +105,7 @@ convert_enc <- function(d, code = c("enc_diag_admit", "enc_diag_princ", paste0("
           diag_coll
         }
       }
+    on.exit(options(future.globals.maxSize = 1.0 * 1e9))
     future::plan(future::sequential)
 
     if(is.null(collapse)) { #Remove unnecessary info and combine with original data if non-collapse
@@ -114,6 +116,7 @@ convert_enc <- function(d, code = c("enc_diag_admit", "enc_diag_princ", paste0("
     }
     return(result)
   } else { #If no diagnoses
+    on.exit(options(future.globals.maxSize = 1.0 * 1e9))
     future::plan(future::sequential)
     return(d)
   }
