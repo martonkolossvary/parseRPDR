@@ -9,7 +9,7 @@ load_all_data(
   folder,
   which_data = c("mrn", "con", "dem", "all", "bib", "dia", "enc", "lab", "lno", "mcm",
     "med", "mic", "phy", "prc", "prv", "ptd", "rdt", "rfv", "trn", "car", "dis", "end",
-    "hnp", "opn", "pat", "prg", "pul", "rad", "vis"),
+    "hnp", "opn", "pat", "prg", "pul", "rad", "vis", "sdh"),
   old_dem = FALSE,
   merge_id = "EMPI",
   sep = ":",

@@ -38,7 +38,7 @@
 #' }
 
 load_all_data <- function(folder, which_data = c("mrn", "con", "dem", "all", "bib", "dia", "enc", "lab", "lno", "mcm", "med", "mic", "phy", "prc", "prv", "ptd", "rdt", "rfv", "trn",
-                                                 "car", "dis", "end", "hnp", "opn", "pat", "prg", "pul", "rad", "vis"), old_dem = FALSE,
+                                                 "car", "dis", "end", "hnp", "opn", "pat", "prg", "pul", "rad", "vis", "sdh"), old_dem = FALSE,
                           merge_id = "EMPI", sep = ":", id_length = "standard", perc = 0.6, na = TRUE, identical = TRUE, nThread = parallel::detectCores()-1, many_sources = TRUE, load_report = TRUE, format_orig = FALSE) {
 
   .SD=.N=.I=.GRP=.BY=.EACHI=..=..cols=.SDcols=i=j=time_to_db=..which_ids_to=..which_ids_from <- NULL
